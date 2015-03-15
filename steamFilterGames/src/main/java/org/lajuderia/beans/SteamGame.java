@@ -35,13 +35,12 @@ public class SteamGame {
     private String _genre;
     private MetacriticGame _metagame;
     
-    public SteamGame(){
-        this._metagame = new MetacriticGame();
-    }
-     
-    public SteamGame(int id , String name, String genre, Boolean completed){
-        this();
+    public SteamGame(int id) {
         this._id = id;
+    }
+    
+    public SteamGame(int id , String name, String genre, Boolean completed){
+        this(id);
         this._name = name;
         this._genre = genre;
         this._completed = completed;
@@ -95,10 +94,10 @@ public class SteamGame {
      * @return the _genre
      */
     public String getGenre() {
-        String genre ;
+        String genre = null;
             if ( _genre != null && !_genre.isEmpty() )
                 genre = _genre;
-            else
+            else if ( _metagame != null && _metagame.getGenre() != null  )
                 genre = _metagame.getGenre();
             
             return ( genre );
@@ -109,5 +108,9 @@ public class SteamGame {
      */
     public void setGenre(String genre) {
         this._genre = genre;
+    }
+    
+    public boolean hasMetaInformation(){
+        return ( _metagame != null );
     }
 }

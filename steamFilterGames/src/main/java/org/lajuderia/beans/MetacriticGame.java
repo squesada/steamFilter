@@ -31,17 +31,17 @@ package org.lajuderia.beans;
 public class MetacriticGame {
     private String _name;
     private String _genre;
-    private String _description;
+    private String _summary;
     private int _metascore;
     private int _userscore;
     
     public MetacriticGame(){
     }
     
-    public MetacriticGame(String name, String description, String genre, 
+    public MetacriticGame(String name, String summary, String genre, 
             int metascore, int userscore){
         this._name = name;
-        this._description = description;
+        this._summary = summary;
         this._genre = genre;
         this._metascore = metascore;
         this._userscore = userscore;
@@ -76,17 +76,17 @@ public class MetacriticGame {
     }
 
     /**
-     * @return the _description
+     * @return the _summary
      */
-    public String getDescription() {
-        return _description;
+    public String getSummary() {
+        return _summary;
     }
 
     /**
-     * @param _description the _description to set
+     * @param _summary the _summary to set
      */
-    public void setDescription(String _description) {
-        this._description = _description;
+    public void setSummary(String _summary) {
+        this._summary = _summary;
     }
 
     /**
@@ -125,6 +125,19 @@ public class MetacriticGame {
                 .append(Integer.toString(_metascore))
                 .append(")")
                 .toString() );
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return (
+                (obj != null)
+                && (obj instanceof MetacriticGame)
+                && (this._name.equals(((MetacriticGame) obj)._name))
+                && (this._genre.equals(((MetacriticGame) obj)._genre))
+                && (this._summary.equals(((MetacriticGame) obj)._summary))
+                && (this._metascore == ((MetacriticGame) obj)._metascore)
+                && (this._userscore == ((MetacriticGame) obj)._userscore)
+                );        
     }
     
 }

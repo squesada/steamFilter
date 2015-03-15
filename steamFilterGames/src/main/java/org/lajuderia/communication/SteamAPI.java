@@ -47,7 +47,7 @@ public class SteamAPI {
     private static final String STEAM_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("STEAM_DEV_KEY");
     private static final String METACRITIC_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("METACRITIC_DEV_KEY");
 
-    public static JSONObject getGameInfo(String gameTitle) {
+    public static JSONObject getMetacriticInfo(String gameTitle) {
         JSONObject gameInfo = null;
         HttpResponse<JsonNode> response;
             try{
@@ -68,7 +68,7 @@ public class SteamAPI {
             return ( gameInfo ) ;
     }
     
-    public static JSONObject getUserOwnedGames(int userId) throws IOException{
+    public static JSONObject getUserOwnedGames(long userId) throws IOException{
         String url;
         url = new StringBuilder()
                 .append("http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/")

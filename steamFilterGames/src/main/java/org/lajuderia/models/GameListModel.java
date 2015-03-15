@@ -24,11 +24,18 @@
 
 package org.lajuderia.models;
 
+import java.util.ArrayList;
 import org.lajuderia.communication.Xml;
 import org.lajuderia.beans.SteamGame;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Observable;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.lajuderia.beans.MetacriticGame;
+import org.lajuderia.communication.SteamAPI;
+import org.lajuderia.daos.SteamGameDAO;
 
 /**
  *
@@ -56,5 +63,69 @@ public class GameListModel extends Observable {
      */
     public Iterator<SteamGame> getGamesIterator() {
         return _gamesMap.values().iterator();
+    }
+
+    public void saveGamesToDisk() throws Exception {
+        Xml.saveGamesToDisk(_gamesMap);
+    }
+    
+    public List<SteamGame> getUpdatedGameListFromSteam(long userId) {
+        //TODO: Verificar que el usuario existe y tiene el perfil público
+        
+        List<SteamGame> newGameList;
+            newGameList = new ArrayList<SteamGame>();
+            for ( SteamGame game : SteamGameDAO.getUserOwnedGames(userId)) {
+                if ( _gamesMap.get(game.getId()) == null ) {
+                    setChanged();
+                    _gamesMap.put(game.getId(), game);
+                    newGameList.add(game);
+                }
+            }
+            
+            notifyObservers();
+            
+            return ( newGameList );
+    }
+    
+    
+    
+    public boolean updateGameWithMetaInfo(int gameId) {
+        boolean gameChanged = false ;
+        SteamGame steamGame = _gamesMap.get(gameId);
+        
+        if ( steamGame != null ) {
+            MetacriticGame metaGame;
+            //TODO: Revisar si esto iría en el dao
+                metaGame = readGameFromMetacriticJSon(
+                    SteamAPI.getMetacriticInfo(steamGame.getName())
+                );
+                
+            if ( metaGame != null && (!steamGame.hasMetaInformation() || !metaGame.equals(steamGame.getMetagame())) ) {
+                steamGame.setMetagame(metaGame);
+                setChanged();
+                gameChanged = true;
+            }
+        }
+        else {
+            //TODO: lanzar error si no existe el juego en el hash
+        }
+        
+        return ( gameChanged ) ;
+    }
+    
+    private static MetacriticGame readGameFromMetacriticJSon(JSONObject gameInfo) {
+        MetacriticGame game = null;
+            try{
+                String name = gameInfo.getString("name");
+                String summary = gameInfo.getString("summary");
+                String genre = gameInfo.getString("genre");
+                int metascore = gameInfo.getInt("score");
+                int userscore = (int) (gameInfo.getDouble("userscore")*10);
+                
+                game = new MetacriticGame(name, summary, genre, metascore, userscore);                
+            }catch(JSONException ex)
+            {}
+            
+            return ( game ) ;
     }
 }

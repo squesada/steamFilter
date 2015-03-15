@@ -29,14 +29,15 @@ import org.lajuderia.beans.MetacriticGame;
 import org.lajuderia.beans.SteamGame;
 import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  *
@@ -50,25 +51,65 @@ public class Xml {
             doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new java.io.File("steamgames.xml"));
             
             for ( int i = 0 ; i < doc.getDocumentElement().getChildNodes().getLength() ; i++){
-                 NamedNodeMap attr = doc.getDocumentElement().getChildNodes().item(i).getAttributes();
-                    SteamGame game ;
-                        game = new SteamGame(
-                            Integer.parseInt(attr.getNamedItem("id").getNodeValue()),
-                            attr.getNamedItem("name").getNodeValue(),
-                            attr.getNamedItem("genre").getNodeValue(),
-                            Boolean.parseBoolean(attr.getNamedItem("completed").getNodeValue())
-                        );
-                        game.setMetagame(new MetacriticGame(
-                            attr.getNamedItem("metaname").getNodeValue(),
-                            attr.getNamedItem("metadescription").getNodeValue(),
-                            attr.getNamedItem("metagenre").getNodeValue(),
-                            Integer.parseInt(attr.getNamedItem("metascore").getNodeValue()),
-                            Integer.parseInt(attr.getNamedItem("userscore").getNodeValue())
-                        ));
-                    
+                 SteamGame game;
+                    game = readGameFromNamedNodeMap(doc.getDocumentElement().getChildNodes().item(i).getAttributes()) ;
                     gamesMap.put(game.getId(), game);
             }
             
             return ( gamesMap ) ;
+    }
+    
+    public static void saveGamesToDisk(HashMap<Integer,SteamGame> gamesMap) throws Exception {
+        Document xmlGames = DocumentBuilderFactory.newInstance().newDocumentBuilder().getDOMImplementation().createDocument(null, "steamgames", null);
+            xmlGames.setXmlVersion("1.0");
+            Element root = xmlGames.getDocumentElement();
+            
+            for (SteamGame game : gamesMap.values()){
+                Element elGame = xmlGames.createElement("game");
+                    saveGameToXmlElement(game, elGame);
+                    root.appendChild(elGame);
+            }
+            
+            Source source = new DOMSource(xmlGames);
+                Result result = new StreamResult(new java.io.File("steamgames.xml")); //nombre del archivo
+                    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                        transformer.transform(source, result);
+    }
+    
+    private static void saveGameToXmlElement(SteamGame game, Element element) {
+        element.setAttribute("id", Integer.toString(game.getId()));
+        element.setAttribute("name", game.getName());
+        element.setAttribute("genre", game.getGenre());
+        element.setAttribute("completed", Boolean.toString(game.isCompleted()));
+        
+        if ( game.hasMetaInformation() ) {
+            element.setAttribute("metaname", game.getMetagame().getName());
+            element.setAttribute("metadescription", game.getMetagame().getSummary());
+            element.setAttribute("metagenre", game.getGenre());
+            element.setAttribute("metascore", Integer.toString(game.getMetagame().getMetascore()));
+            element.setAttribute("userscore", Integer.toString(game.getMetagame().getUserscore()));
+        }
+    }
+    
+    private static SteamGame readGameFromNamedNodeMap(NamedNodeMap nodeMap) {
+        SteamGame game ;
+            game = new SteamGame(
+                Integer.parseInt(nodeMap.getNamedItem("id").getNodeValue()),
+                nodeMap.getNamedItem("name").getNodeValue(),
+                nodeMap.getNamedItem("genre").getNodeValue(),
+                Boolean.parseBoolean(nodeMap.getNamedItem("completed").getNodeValue())
+            );
+            
+            if ( nodeMap.getNamedItem("metaname") != null ) {
+                game.setMetagame(new MetacriticGame(
+                    nodeMap.getNamedItem("metaname").getNodeValue(),
+                    nodeMap.getNamedItem("metadescription").getNodeValue(),
+                    nodeMap.getNamedItem("metagenre").getNodeValue(),
+                    Integer.parseInt(nodeMap.getNamedItem("metascore").getNodeValue()),
+                    Integer.parseInt(nodeMap.getNamedItem("userscore").getNodeValue())
+                ));
+            }
+            
+            return ( game );
     }
 }

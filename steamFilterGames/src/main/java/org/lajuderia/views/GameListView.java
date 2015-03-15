@@ -53,8 +53,11 @@ public class GameListView extends javax.swing.JFrame {
         lbStatus = new javax.swing.JLabel();
         btLoadXML = new javax.swing.JButton();
         btImportFromSteam = new javax.swing.JButton();
+        btSaveXML = new javax.swing.JButton();
+        btMetacritic = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         jtGames.setAutoCreateRowSorter(true);
         jScrollPane1.setViewportView(jtGames);
@@ -67,6 +70,11 @@ public class GameListView extends javax.swing.JFrame {
 
         btImportFromSteam.setText(bundle.getString("IMPORT_GAMES_FROM_STEAM")); // NOI18N
 
+        btSaveXML.setText(bundle.getString("SAVE_GAMES")); // NOI18N
+        btSaveXML.setToolTipText("");
+
+        btMetacritic.setText(bundle.getString("IMPORT_METACRITIC")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -78,7 +86,11 @@ public class GameListView extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btLoadXML)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btSaveXML)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btImportFromSteam)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btMetacritic)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -91,7 +103,9 @@ public class GameListView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btLoadXML)
-                    .addComponent(btImportFromSteam))
+                    .addComponent(btImportFromSteam)
+                    .addComponent(btSaveXML)
+                    .addComponent(btMetacritic))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 418, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -109,6 +123,8 @@ public class GameListView extends javax.swing.JFrame {
     public void registerListener(ActionListener listener){
         this.btLoadXML.addActionListener(listener);
         this.btImportFromSteam.addActionListener(listener);
+        this.btSaveXML.addActionListener(listener);
+        this.btMetacritic.addActionListener(listener);
     }
     
     public void setTableModel(TableModel tableModel) {
@@ -116,12 +132,25 @@ public class GameListView extends javax.swing.JFrame {
     }
     
     public Object getTableValueAt(int row, int column){
-        return ( jtGames.getModel().getValueAt(row, column) ) ;
+        return ( jtGames.getModel().getValueAt(
+                jtGames.convertRowIndexToModel(row),
+                column)
+            ) ;
+    }
+    
+    public void setMessageStatus(String message) {
+        lbStatus.setText(message);
+    }
+    
+    public int[] getSelectedTableRows() {
+        return ( jtGames.getSelectedRows() );
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btImportFromSteam;
     private javax.swing.JButton btLoadXML;
+    private javax.swing.JButton btMetacritic;
+    private javax.swing.JButton btSaveXML;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jtGames;
     private javax.swing.JLabel lbStatus;
