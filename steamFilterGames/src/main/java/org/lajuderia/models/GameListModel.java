@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Observable;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.lajuderia.beans.MetacriticGame;
+import org.lajuderia.beans.Game;
+import org.lajuderia.beans.MetaInformation;
 import org.lajuderia.communication.SteamAPI;
 import org.lajuderia.daos.SteamGameDAO;
 
@@ -42,10 +43,10 @@ import org.lajuderia.daos.SteamGameDAO;
  * @author Sergio
  */
 public class GameListModel extends Observable {
-    private HashMap<Integer, SteamGame> _gamesMap ;
+    private HashMap<String, Game> _gamesMap ;
     
     public GameListModel () {
-        this._gamesMap = new HashMap<Integer, SteamGame>();
+        this._gamesMap = new HashMap<String, Game>();
     }
     
     public void loadGamesFromDisk() throws Exception {        
@@ -54,31 +55,33 @@ public class GameListModel extends Observable {
         notifyObservers();
     }
     
-    public SteamGame findGameById(int id){
+    public Game findGameById(String id){
         return ( _gamesMap.get(id) ) ;
     }
 
     /**
      * @return the _gamesMap
      */
-    public Iterator<SteamGame> getGamesIterator() {
+    public Iterator<Game> getGamesIterator() {
         return _gamesMap.values().iterator();
     }
 
     public void saveGamesToDisk() throws Exception {
-        Xml.saveGamesToDisk(_gamesMap);
+        Xml.saveGamesToDisk(_gamesMap.values());
     }
     
-    public List<SteamGame> getUpdatedGameListFromSteam(long userId) {
+    public List<Game> getUpdatedGameListFromSteam(long userId) {
         //TODO: Verificar que el usuario existe y tiene el perfil público
         
-        List<SteamGame> newGameList;
-            newGameList = new ArrayList<SteamGame>();
-            for ( SteamGame game : SteamGameDAO.getUserOwnedGames(userId)) {
-                if ( _gamesMap.get(game.getId()) == null ) {
+        List<Game> newGameList;
+            newGameList = new ArrayList<Game>();
+            for ( SteamGame currentGame : SteamGameDAO.getUserOwnedGames(userId)) {
+                Game newGame = new Game(currentGame);
+                
+                if ( _gamesMap.get(newGame.getId()) == null ) {
                     setChanged();
-                    _gamesMap.put(game.getId(), game);
-                    newGameList.add(game);
+                    _gamesMap.put(newGame.getId(), newGame);
+                    newGameList.add(newGame);
                 }
             }
             
@@ -89,19 +92,20 @@ public class GameListModel extends Observable {
     
     
     
-    public boolean updateGameWithMetaInfo(int gameId) {
+    public boolean updateGameWithMetaInfo(String gameId) {
         boolean gameChanged = false ;
-        SteamGame steamGame = _gamesMap.get(gameId);
+        Game theGame = _gamesMap.get(gameId);
         
-        if ( steamGame != null ) {
-            MetacriticGame metaGame;
-            //TODO: Revisar si esto iría en el dao
-                metaGame = readGameFromMetacriticJSon(
-                    SteamAPI.getMetacriticInfo(steamGame.getName())
-                );
+        if ( theGame != null ) {
+            MetaInformation metaInformation = null;
+            JSONObject json;
+                json = SteamAPI.getMetacriticInfo(theGame.getName());
+                if ( json != null ) {
+                    metaInformation = readGameFromMetacriticJSon(json);
+                }
                 
-            if ( metaGame != null && (!steamGame.hasMetaInformation() || !metaGame.equals(steamGame.getMetagame())) ) {
-                steamGame.setMetagame(metaGame);
+            if ( metaInformation != null && (!theGame.hasMetaInformation() || !metaInformation.equals(theGame.getMetaInformation())) ) {
+                theGame.setMetaInformation(metaInformation);
                 setChanged();
                 gameChanged = true;
             }
@@ -113,19 +117,23 @@ public class GameListModel extends Observable {
         return ( gameChanged ) ;
     }
     
-    private static MetacriticGame readGameFromMetacriticJSon(JSONObject gameInfo) {
-        MetacriticGame game = null;
-            try{
-                String name = gameInfo.getString("name");
-                String summary = gameInfo.getString("summary");
-                String genre = gameInfo.getString("genre");
-                int metascore = gameInfo.getInt("score");
-                int userscore = (int) (gameInfo.getDouble("userscore")*10);
-                
-                game = new MetacriticGame(name, summary, genre, metascore, userscore);                
-            }catch(JSONException ex)
-            {}
-            
-            return ( game ) ;
+    private static MetaInformation readGameFromMetacriticJSon(JSONObject gameInfo) {
+        String name = !gameInfo.isNull("name") && gameInfo.get("name") instanceof String
+            ? gameInfo.getString("name")
+            : "";
+        String summary = !gameInfo.isNull("summary") && gameInfo.get("summary") instanceof String 
+            ? gameInfo.getString("summary") 
+            : "";
+        String genre = !gameInfo.isNull("genre") && gameInfo.get("genre") instanceof String 
+            ? gameInfo.getString("genre") 
+            : "";
+        int metascore = !gameInfo.isNull("score") && gameInfo.get("score") instanceof String && gameInfo.getString("score").matches("\\d*")
+            ? gameInfo.getInt("score") 
+            : 0 ;
+        int userscore = !gameInfo.isNull("userscore") && gameInfo.get("userscore") instanceof Double 
+            ? (int) (gameInfo.getDouble("userscore")*10) 
+            : 0;
+
+        return ( new MetaInformation(name, summary, genre, metascore, userscore) ) ;
     }
 }

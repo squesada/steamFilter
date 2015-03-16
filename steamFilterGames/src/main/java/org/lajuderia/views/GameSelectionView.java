@@ -31,20 +31,20 @@ import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListModel;
-import org.lajuderia.beans.MetacriticGame;
+import org.lajuderia.beans.MetaInformation;
 
 /**
  *
  * @author Sergio
  */
 public class GameSelectionView extends javax.swing.JDialog {
-    private final List<MetacriticGame> _metaGames;
+    private final List<MetaInformation> _metaGames;
     private boolean _ok;
 
     /**
      * Creates new form GameSelectionView
      */
-    public GameSelectionView(JFrame parent, List<MetacriticGame> metaGames) {
+    public GameSelectionView(JFrame parent, List<MetaInformation> metaGames) {
         super(parent,true);
         this._ok = false;
         this._metaGames = metaGames;
@@ -60,8 +60,8 @@ public class GameSelectionView extends javax.swing.JDialog {
         return ( _ok );
     }
     
-    public MetacriticGame getSelectedGame(){
-        return((MetacriticGame) lstGames.getSelectedValue());
+    public MetaInformation getSelectedGame(){
+        return((MetaInformation) lstGames.getSelectedValue());
     }
     
     private void fillGamesListView(){

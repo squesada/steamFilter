@@ -28,89 +28,12 @@ package org.lajuderia.beans;
  *
  * @author Sergio Quesada <squesada.dev@gmail.com>
  */
-public class SteamGame {
-    private int _id;
-    private String _name;
-    private boolean _completed;
-    private String _genre;
-    private MetacriticGame _metagame;
+public class SteamGame extends AbstractPlatformGame{
     
-    public SteamGame(int id) {
-        this._id = id;
+    public SteamGame(){
+        super(Platform.STEAM);
     }
-    
-    public SteamGame(int id , String name, String genre, Boolean completed){
-        this(id);
-        this._name = name;
-        this._genre = genre;
-        this._completed = completed;
-    }   
-    
-    public int getId(){
-        return ( this._id ) ;
-    }
-    
-    public void setId(int id){
-        this._id = id ;
-    }
-    
-    public String getName(){
-        return ( this._name ) ;
-    }
-    
-    public void setName(String name){
-        this._name = name;
-    }
-
-    /**
-     * @return the _completed
-     */
-    public boolean isCompleted() {
-        return _completed;
-    }
-
-    /**
-     * @param completed the completed to set
-     */
-    public void setCompleted(boolean completed) {
-        this._completed = completed;
-    }
-
-    /**
-     * @return the _metagame
-     */
-    public MetacriticGame getMetagame() {
-        return _metagame;
-    }
-
-    /**
-     * @param metagame the metagame to set
-     */
-    public void setMetagame(MetacriticGame metagame) {
-        this._metagame = metagame;
-    }
-
-    /**
-     * @return the _genre
-     */
-    public String getGenre() {
-        String genre = null;
-            if ( _genre != null && !_genre.isEmpty() )
-                genre = _genre;
-            else if ( _metagame != null && _metagame.getGenre() != null  )
-                genre = _metagame.getGenre();
-            
-            return ( genre );
-    }
-
-    /**
-     * @param genre the genre to set
-     */
-    public void setGenre(String genre) {
-        this._genre = genre;
-    }
-    
-    public boolean hasMetaInformation(){
-        return ( _metagame != null );
+    public SteamGame(int id , String name){
+        super(id, name, Platform.STEAM);
     }
 }

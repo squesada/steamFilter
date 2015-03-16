@@ -28,17 +28,17 @@ package org.lajuderia.beans;
  *
  * @author Sergio
  */
-public class MetacriticGame {
+public class MetaInformation {
     private String _name;
     private String _genre;
     private String _summary;
     private int _metascore;
     private int _userscore;
     
-    public MetacriticGame(){
+    public MetaInformation(){
     }
     
-    public MetacriticGame(String name, String summary, String genre, 
+    public MetaInformation(String name, String summary, String genre, 
             int metascore, int userscore){
         this._name = name;
         this._summary = summary;
@@ -131,12 +131,12 @@ public class MetacriticGame {
     public boolean equals(Object obj) {
         return (
                 (obj != null)
-                && (obj instanceof MetacriticGame)
-                && (this._name.equals(((MetacriticGame) obj)._name))
-                && (this._genre.equals(((MetacriticGame) obj)._genre))
-                && (this._summary.equals(((MetacriticGame) obj)._summary))
-                && (this._metascore == ((MetacriticGame) obj)._metascore)
-                && (this._userscore == ((MetacriticGame) obj)._userscore)
+                && (obj instanceof MetaInformation)
+                && (this._name.equals(((MetaInformation) obj)._name))
+                && (this._genre.equals(((MetaInformation) obj)._genre))
+                && (this._summary.equals(((MetaInformation) obj)._summary))
+                && (this._metascore == ((MetaInformation) obj)._metascore)
+                && (this._userscore == ((MetaInformation) obj)._userscore)
                 );        
     }
     

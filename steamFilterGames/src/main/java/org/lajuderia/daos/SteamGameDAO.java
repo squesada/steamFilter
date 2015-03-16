@@ -29,7 +29,7 @@ import org.lajuderia.beans.SteamGame;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.lajuderia.beans.MetacriticGame;
+import org.lajuderia.beans.MetaInformation;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,29 +56,26 @@ public class SteamGameDAO {
             
         return(gameList);
     }    
-    
-    public static List<MetacriticGame> searchSimilarMetacriticGames(SteamGame game){
-        List<MetacriticGame> metaGames = null ;
+    /*
+    public static List<MetaInformation> searchSimilarMetacriticGames(SteamGame game){
+        List<MetaInformation> metaGames = null ;
         JSONArray jsonMetacritic;
             jsonMetacritic = SteamAPI.getSimilarMetacriticGames(game.getName());
             if ( jsonMetacritic != null ){
-                metaGames = new ArrayList<MetacriticGame>();
+                metaGames = new ArrayList<MetaInformation>();
                 for ( int i = 0 ; i < jsonMetacritic.length() ; i++ )
                     metaGames.add(readGameFromMetacriticJSon(jsonMetacritic.getJSONObject(i)));
             }
             
             return ( metaGames );
     }
-    
+    */
     private static SteamGame readGameFromSteamJson(JSONObject json){
-        SteamGame game = new SteamGame(json.getInt("appid"));
-            game.setName(json.getString("name"));
-
-        return ( game );
+        return ( new SteamGame(json.getInt("appid"),json.getString("name")) );
     }    
 
-    private static MetacriticGame readGameFromMetacriticJSon(JSONObject gameInfo) {
-        MetacriticGame game = new MetacriticGame();
+    private static MetaInformation readGameFromMetacriticJSon(JSONObject gameInfo) {
+        MetaInformation game = new MetaInformation();
             try{
                 game.setName(gameInfo.getString("name"));
             }catch(JSONException ex){}

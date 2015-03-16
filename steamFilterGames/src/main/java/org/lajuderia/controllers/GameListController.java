@@ -33,11 +33,13 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
+import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import org.lajuderia.beans.Game;
 import org.lajuderia.models.GameListModel;
 import org.lajuderia.views.GameListView;
 
@@ -59,29 +61,8 @@ public class GameListController implements Observer {
         _model.addObserver(GameListController.this);
     }
 
-    private int importGamesFromSteam() throws Exception {
-        ResourceBundle res = java.util.ResourceBundle
-                .getBundle("ConfigurationBundle") ;
-        
-        String steamID ;
-            steamID = JOptionPane.showInputDialog(
-                _view, 
-                java.util.ResourceBundle
-                    .getBundle("MessagesBundle").getString("REQUEST_STEAM_ID"),
-                res.containsKey("STEAM_USER_ID")
-                    ? res.getString("STEAM_USER_ID")
-                    : ""
-            );
-        
-        int addedGamesCount ;
-        try {
-            addedGamesCount = _model
-                    .getUpdatedGameListFromSteam(Long.parseLong(steamID)).size() ;
-        } catch (Exception ex) {
-            throw ( ex ) ;
-        }
-        
-        return ( addedGamesCount ) ;
+    private void importGamesFromSteam(long steamID) throws Exception {        
+        new LoadSteamGamesWorker(steamID).execute();
     }
 
     private void loadGamesFromXML() throws Exception {
@@ -93,10 +74,10 @@ public class GameListController implements Observer {
     }
     
     private void updateGamesWithMetaInfo() {
-        List<Integer> gameIds;
-            gameIds = new ArrayList<Integer>();
+        List<String> gameIds;
+            gameIds = new ArrayList<String>();
             for ( int row : _view.getSelectedTableRows() ) {
-                gameIds.add((Integer) _view.getTableValueAt(row,GameListTableModel.ID_NUM_COLUMN));
+                gameIds.add((String) _view.getTableValueAt(row,GameListTableModel.ID_NUM_COLUMN));
             }
         
         new LoadMetacriticInfoWorker(gameIds).execute();
@@ -108,26 +89,26 @@ public class GameListController implements Observer {
             
             _view.setTableModel(model);
 
-            Iterator<SteamGame> it = _model.getGamesIterator();
+            Iterator<Game> it = _model.getGamesIterator();
             
             while ( it.hasNext() ){
-               model.addRow(gameToArray(it.next()));
+               model.addRow(createArrayFromGame(it.next()));
             }
             
             model.addTableModelListener(_listener);
     }
     
-    private Object[] gameToArray(SteamGame game){
+    private Object[] createArrayFromGame(Game game){
         Object[] row ;
             row = new Object[6];
             row[0] = game.getId();
             row[1] = game.getName();
             row[2] = game.getGenre();
             row[3] = game.hasMetaInformation()
-                    ? game.getMetagame().getMetascore()
+                    ? game.getMetaInformation().getMetascore()
                     : null ;
             row[4] = game.hasMetaInformation()
-                    ? game.getMetagame().getUserscore()
+                    ? game.getMetaInformation().getUserscore()
                     : null ;
             row[5] = game.isCompleted();
             
@@ -136,6 +117,8 @@ public class GameListController implements Observer {
     
     private class GameListTableModel extends DefaultTableModel{
         public static final int ID_NUM_COLUMN = 0 ;
+        public static final int NAME_NUM_COLUMN = 1 ;
+        public static final int GENRE_NUM_COLUMN = 2 ;
         public static final int METASCORE_NUM_COLUMN = 3 ;
         public static final int USERSCORE_NUM_COLUMN = 4 ;
         public static final int COMPLETED_NUM_COLUMN = 5 ;
@@ -153,8 +136,7 @@ public class GameListController implements Observer {
 
             if ( columnIndex == COMPLETED_NUM_COLUMN )
                 columnClass = java.lang.Boolean.class;
-            else if ( ( columnIndex == ID_NUM_COLUMN )
-                    || ( columnIndex == METASCORE_NUM_COLUMN )
+            else if ( ( columnIndex == METASCORE_NUM_COLUMN )
                     || ( columnIndex == USERSCORE_NUM_COLUMN )
                     )
                 columnClass = java.lang.Integer.class;
@@ -166,7 +148,11 @@ public class GameListController implements Observer {
         
         @Override
         public boolean isCellEditable(int row, int column){
-            return ( column == COMPLETED_NUM_COLUMN ) ;
+            return (
+                    (column == COMPLETED_NUM_COLUMN)
+                    || (column == NAME_NUM_COLUMN)
+                    || (column == GENRE_NUM_COLUMN)
+                );
         }       
     }
     
@@ -181,22 +167,51 @@ public class GameListController implements Observer {
             try {
                 if ( command.equals(lblBundle.getString("LOAD_GAMES")) ) {
                     loadGamesFromXML();
-                    resultMessage = msgBundle.getString("GAMES_PROPERLY_LOADED");
+                    resultMessage = msgBundle.getString("GAMES_LOADED");
                 }
                 else if ( command.equals(lblBundle.getString("IMPORT_GAMES_FROM_STEAM")) ) {
-                    int addedGamesCount = importGamesFromSteam();
-                    resultMessage = String.format(
-                        msgBundle.getString("GAMES_PROPERLY_IMPORTED") ,
-                        addedGamesCount
-                    );
+                    ResourceBundle res = java.util.ResourceBundle
+                        .getBundle("ConfigurationBundle") ;
+        
+                    String steamID ;
+                        steamID = JOptionPane.showInputDialog(
+                            _view, 
+                            java.util.ResourceBundle
+                                .getBundle("MessagesBundle").getString("STEAM_USER_ID_REQUEST"),
+                            res.containsKey("STEAM_USER_ID")
+                                ? res.getString("STEAM_USER_ID")
+                                : ""
+                        );
+                        
+                        if ( steamID != null && !steamID.isEmpty() && steamID.matches("\\d*")) {                        
+                            importGamesFromSteam(Long.parseLong(steamID));
+                            resultMessage = msgBundle.getString("STEAM_LOADING");
+                        }
+                        else
+                            resultMessage = msgBundle.getString("OPERATION_CANCELLED");
                 }
                 else if ( command.equals(lblBundle.getString("SAVE_GAMES")) ) {
-                    saveGamesToXML();
-                    resultMessage = msgBundle.getString("GAMES_PROPERLY_SAVED");
+                    if (JOptionPane.showConfirmDialog(
+                            _view,
+                            msgBundle.getString("CONFIRM_WRITE_GAMES_TO_DISK"),
+                            msgBundle.getString("ALERT_DIALOG_TITLE"),
+                            JOptionPane.OK_CANCEL_OPTION
+                        ) == JOptionPane.OK_OPTION){
+                        saveGamesToXML();
+                        resultMessage = msgBundle.getString("GAMES_SAVED");
+                    }
+                    else
+                        resultMessage = msgBundle.getString("OPERATION_CANCELLED");
                 }
                 else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC"))) {
                     updateGamesWithMetaInfo();
                     resultMessage = msgBundle.getString("METACRITIC_INFO_EXECUTED");
+                } else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC_MANUAL"))) {
+                    if ( _view.getSelectedTableRows().length == 1 ) {
+                        updateGameWithMetaInfoManual();
+                    }
+                    else
+                        resultMessage = msgBundle.getString("SELECT_JUST_ONE_GAME");
                 }
                 _view.setMessageStatus(resultMessage);
             } catch (Exception ex) {
@@ -205,26 +220,39 @@ public class GameListController implements Observer {
         }
 
         public void tableChanged(TableModelEvent tme) {
-            if ( tme.getColumn() == GameListTableModel.COMPLETED_NUM_COLUMN ) {
-                _model.findGameById((Integer) _view.getTableValueAt(tme.getLastRow(), 1))
-                        .setCompleted((Boolean) _view.getTableValueAt(tme.getLastRow(), 6));
-            }
-        }        
+            Game theGame = _model.findGameById((String) _view.getTableModelValueAt(tme.getLastRow(), 0)) ;
+                switch ( tme.getColumn() ) {
+                    case GameListTableModel.NAME_NUM_COLUMN:
+                        theGame.setName((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                        break ;
+                    case GameListTableModel.GENRE_NUM_COLUMN:
+                        theGame.setGenre((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                        break ;
+                    case GameListTableModel.COMPLETED_NUM_COLUMN:
+                        theGame.setCompleted((Boolean) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                        break ;
+                    default:                       
+                } 
+        }
+        
+        private void updateGameWithMetaInfoManual() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
     
     
     public class LoadMetacriticInfoWorker extends SwingWorker<Void, Integer> {
-        private final List<Integer> _gameIds;
+        private final List<String> _gameIds;
         
-        public LoadMetacriticInfoWorker(List<Integer> gameIds){
+        public LoadMetacriticInfoWorker(List<String> gameIds){
             this._gameIds = gameIds;
         }
 
         @Override
-        protected Void doInBackground() throws Exception {
+        protected Void doInBackground() {
             int count = 0 ;
             
-            for ( int gameId : _gameIds ) {
+            for ( String gameId : _gameIds ) {
                 if ( _model.updateGameWithMetaInfo(gameId) ) {
                     ++count;
                     publish(count);
@@ -243,7 +271,28 @@ public class GameListController implements Observer {
         protected void done(){
             _model.notifyObservers();
             _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
+        }        
+    }
+    
+    public class LoadSteamGamesWorker extends SwingWorker<Void, Integer> {
+        private final long _steamId;
+        private int _loadedGamesCount;
+        
+        public LoadSteamGamesWorker(Long steamId){
+            this._steamId = steamId;
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            _loadedGamesCount = _model.getUpdatedGameListFromSteam(_steamId).size() ;
+            
+            return ( null );
         }
         
+        @Override
+        protected void done(){
+            _model.notifyObservers();
+            _view.setMessageStatus(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("STEAM_LOADED"), _loadedGamesCount));
+        }        
     }
 }
