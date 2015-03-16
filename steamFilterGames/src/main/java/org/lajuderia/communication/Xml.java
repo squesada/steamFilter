@@ -86,14 +86,14 @@ public class Xml {
     }
     
     private static void createElementFromGame(Game game, Element element) {
-        element.setAttribute("name", game.getName());
+        element.setAttribute("title", game.getTitle());
         element.setAttribute("genre", game.getGenre());
         element.setAttribute("completed", Boolean.toString(game.isCompleted()));
         
         if ( game.hasAssociatedPlatformGame()){
             element.setAttribute("platform", game.getAssociatedGame().getPlatform().toString());
             element.setAttribute("platformid", Integer.toString(game.getAssociatedGame().getId()));
-            element.setAttribute("platformname", game.getAssociatedGame().getName());
+            element.setAttribute("platformname", game.getAssociatedGame().getTitle());
         }
         
         if ( game.hasMetaInformation() ) {
@@ -108,7 +108,7 @@ public class Xml {
     private static Game readGameFromNamedNodeMap(NamedNodeMap nodeMap) {
         Game game ;
             game = new Game() ;
-            game.setName(nodeMap.getNamedItem("name").getNodeValue());
+            game.setTitle(nodeMap.getNamedItem("title").getNodeValue());
             game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
             game.setCompleted(Boolean.parseBoolean(nodeMap.getNamedItem("completed").getNodeValue()));
             

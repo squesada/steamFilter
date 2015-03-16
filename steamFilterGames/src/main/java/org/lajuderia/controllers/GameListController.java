@@ -24,7 +24,6 @@
 
 package org.lajuderia.controllers ;
 
-import org.lajuderia.beans.SteamGame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
-import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
@@ -102,7 +100,7 @@ public class GameListController implements Observer {
         Object[] row ;
             row = new Object[6];
             row[0] = game.getId();
-            row[1] = game.getName();
+            row[1] = game.getTitle();
             row[2] = game.getGenre();
             row[3] = game.hasMetaInformation()
                     ? game.getMetaInformation().getMetascore()
@@ -122,8 +120,17 @@ public class GameListController implements Observer {
         public static final int METASCORE_NUM_COLUMN = 3 ;
         public static final int USERSCORE_NUM_COLUMN = 4 ;
         public static final int COMPLETED_NUM_COLUMN = 5 ;
+        private final ResourceBundle textBundle =
+                java.util.ResourceBundle.getBundle("TextsBundle");
         
-        private final String[] TABLE_TITLES = {"ID","Nombre","Género","Metascore","Userscore","Completado"};
+        private final String[] TABLE_TITLES = {
+            textBundle.getString("GAME_ID"),
+            textBundle.getString("GAME_TITLE"),
+            textBundle.getString("GAME_GENRE"),
+            textBundle.getString("GAME_METASCORE"),
+            textBundle.getString("GAME_USERSCORE"),
+            textBundle.getString("GAME_COMPLETED")
+        };
         
         public GameListTableModel(){
             super();
@@ -223,7 +230,7 @@ public class GameListController implements Observer {
             Game theGame = _model.findGameById((String) _view.getTableModelValueAt(tme.getLastRow(), 0)) ;
                 switch ( tme.getColumn() ) {
                     case GameListTableModel.NAME_NUM_COLUMN:
-                        theGame.setName((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                        theGame.setTitle((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
                         break ;
                     case GameListTableModel.GENRE_NUM_COLUMN:
                         theGame.setGenre((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));

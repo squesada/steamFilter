@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.lajuderia.beans.Game;
 import org.lajuderia.beans.MetaInformation;
@@ -99,7 +98,7 @@ public class GameListModel extends Observable {
         if ( theGame != null ) {
             MetaInformation metaInformation = null;
             JSONObject json;
-                json = SteamAPI.getMetacriticInfo(theGame.getName());
+                json = SteamAPI.getMetacriticInfo(theGame.getTitle());
                 if ( json != null ) {
                     metaInformation = readGameFromMetacriticJSon(json);
                 }
@@ -118,7 +117,7 @@ public class GameListModel extends Observable {
     }
     
     private static MetaInformation readGameFromMetacriticJSon(JSONObject gameInfo) {
-        String name = !gameInfo.isNull("name") && gameInfo.get("name") instanceof String
+        String title = !gameInfo.isNull("name") && gameInfo.get("name") instanceof String
             ? gameInfo.getString("name")
             : "";
         String summary = !gameInfo.isNull("summary") && gameInfo.get("summary") instanceof String 
@@ -134,6 +133,6 @@ public class GameListModel extends Observable {
             ? (int) (gameInfo.getDouble("userscore")*10) 
             : 0;
 
-        return ( new MetaInformation(name, summary, genre, metascore, userscore) ) ;
+        return ( new MetaInformation(title, summary, genre, metascore, userscore) ) ;
     }
 }

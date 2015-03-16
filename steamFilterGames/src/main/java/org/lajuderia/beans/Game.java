@@ -28,7 +28,7 @@ package org.lajuderia.beans;
  * @author Sergio
  */
 public class Game {
-    private String _name;
+    private String _title;
     private String _genre;
     private AbstractPlatformGame _platformGame;
     private MetaInformation _metaInformation;
@@ -39,7 +39,7 @@ public class Game {
     }
     
     public Game(AbstractPlatformGame platformGame) {
-        this._name = platformGame.getName();
+        this._title = platformGame.getTitle();
         this._platformGame = platformGame ;
     }
   
@@ -53,17 +53,17 @@ public class Game {
     }
 
     /**
-     * @return the _name
+     * @return the _title
      */
-    public String getName() {
-        return _name;
+    public String getTitle() {
+        return _title;
     }
 
     /**
-     * @param name the _name to set
+     * @param name the _title to set
      */
-    public void setName(String name) {
-        this._name = name;
+    public void setTitle(String name) {
+        this._title = name;
     }
 
     /**

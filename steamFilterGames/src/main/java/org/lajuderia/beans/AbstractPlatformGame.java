@@ -50,7 +50,7 @@ public abstract class AbstractPlatformGame {
         this._id = id ;
     }
     
-    public String getName(){
+    public String getTitle(){
         return ( this._name ) ;
     }
     
