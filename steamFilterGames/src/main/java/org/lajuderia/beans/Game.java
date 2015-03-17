@@ -106,6 +106,9 @@ public class Game {
      */
     public void setMetaInformation(MetaInformation metaInformation) {
         this._metaInformation = metaInformation;
+        
+        if ( (_genre == null) || (_genre.isEmpty()) )
+            _genre = metaInformation.getGenre();
     }
 
     /**
@@ -128,5 +131,29 @@ public class Game {
 
     public boolean hasAssociatedPlatformGame() {
         return ( this._platformGame != null );
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        return (
+                (obj != null)
+                && (obj instanceof Game)
+                && (_title.equals(((Game) obj)._title))
+                && (_genre.equals(((Game) obj)._genre))
+                && (_completed == ((Game) obj)._completed)
+                && (_platformGame.equals(((Game) obj)._platformGame))
+                && (_metaInformation.equals(((Game) obj)._metaInformation))
+                );
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 23 * hash + (this._title != null ? this._title.hashCode() : 0);
+        hash = 23 * hash + (this._genre != null ? this._genre.hashCode() : 0);
+        hash = 23 * hash + (this._platformGame != null ? this._platformGame.hashCode() : 0);
+        hash = 23 * hash + (this._metaInformation != null ? this._metaInformation.hashCode() : 0);
+        hash = 23 * hash + (this._completed ? 1 : 0);
+        return hash;
     }
 }

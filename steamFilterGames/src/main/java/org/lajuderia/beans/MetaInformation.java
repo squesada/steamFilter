@@ -50,7 +50,7 @@ public class MetaInformation {
     /**
      * @return the _name
      */
-    public String getName() {
+    public String getTitle() {
         return _name;
     }
 
@@ -121,7 +121,7 @@ public class MetaInformation {
     public String toString(){
         return ( new StringBuilder()
                 .append(_name)
-                .append(" (")
+                .append(" (MSC:")
                 .append(Integer.toString(_metascore))
                 .append(")")
                 .toString() );
@@ -138,6 +138,17 @@ public class MetaInformation {
                 && (this._metascore == ((MetaInformation) obj)._metascore)
                 && (this._userscore == ((MetaInformation) obj)._userscore)
                 );        
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + (this._name != null ? this._name.hashCode() : 0);
+        hash = 89 * hash + (this._genre != null ? this._genre.hashCode() : 0);
+        hash = 89 * hash + (this._summary != null ? this._summary.hashCode() : 0);
+        hash = 89 * hash + this._metascore;
+        hash = 89 * hash + this._userscore;
+        return hash;
     }
     
 }

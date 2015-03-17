@@ -97,7 +97,7 @@ public class Xml {
         }
         
         if ( game.hasMetaInformation() ) {
-            element.setAttribute("metaname", game.getMetaInformation().getName());
+            element.setAttribute("metaname", game.getMetaInformation().getTitle());
             element.setAttribute("metadescription", game.getMetaInformation().getSummary());
             element.setAttribute("metagenre", game.getMetaInformation().getGenre());
             element.setAttribute("metascore", Integer.toString(game.getMetaInformation().getMetascore()));

@@ -25,12 +25,12 @@
 
 package org.lajuderia.views;
 
-import java.util.List;
-import javax.swing.AbstractListModel;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.ListModel;
+import javax.swing.event.ListSelectionListener;
 import org.lajuderia.beans.MetaInformation;
 
 /**
@@ -38,39 +38,58 @@ import org.lajuderia.beans.MetaInformation;
  * @author Sergio
  */
 public class GameSelectionView extends javax.swing.JDialog {
-    private final List<MetaInformation> _metaGames;
-    private boolean _ok;
 
     /**
      * Creates new form GameSelectionView
      */
-    public GameSelectionView(JFrame parent, List<MetaInformation> metaGames) {
+    public GameSelectionView(JFrame parent) {
         super(parent,true);
-        this._ok = false;
-        this._metaGames = metaGames;
-        initComponents();        
-        fillGamesListView();
+        initComponents();
     }
     
     public JList getGameListView(){
         return ( this.lstGames );
     }
     
-    public boolean wasCloseOK(){
-        return ( _ok );
-    }
-    
     public MetaInformation getSelectedGame(){
         return((MetaInformation) lstGames.getSelectedValue());
     }
     
-    private void fillGamesListView(){
-        ListModel model ;
-            model = new AbstractListModel(){
-                public int getSize() { return _metaGames.size(); }
-                public Object getElementAt(int i) { return _metaGames.get(i); }
-            };
-            this.lstGames.setModel(model);        
+    public void setEnteredTitle(String title){
+        this.txtTitle.setText(title);
+    }
+    
+    public String getEnteredTitle(){
+        return ( txtTitle.getText() );
+    }
+    
+    public void registerActionListener(ActionListener listener) {
+        this.btAccept.addActionListener(listener);
+        this.btCancel.addActionListener(listener);
+    }
+    
+    public void registerKeyListener(KeyListener listener) {
+        this.txtTitle.addKeyListener(listener);
+    }
+    
+    public void registerListSelectionListener(ListSelectionListener listener) {
+        this.lstGames.addListSelectionListener(listener);
+    }
+    
+    public void setListModel(ListModel model) {
+        lstGames.setModel(model);
+    }
+    
+    public void setMessageStatus(String message) {
+        this.lbStatus.setText(message);
+    }
+    
+    public Object getSelectedItem(){
+        return ( lstGames.getSelectedValue() );
+    }
+    
+    public void setAllowToAccept(boolean enable){
+        btAccept.setEnabled(enable);
     }
 
     /**
@@ -85,26 +104,25 @@ public class GameSelectionView extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         lstGames = new javax.swing.JList();
         btAccept = new javax.swing.JButton();
-        bt = new javax.swing.JButton();
+        btCancel = new javax.swing.JButton();
+        lbTitle = new javax.swing.JLabel();
+        txtTitle = new javax.swing.JTextField();
+        lbStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
 
         lstGames.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(lstGames);
 
-        btAccept.setText("Aceptar");
-        btAccept.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btAcceptActionPerformed(evt);
-            }
-        });
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("LabelsBundle"); // NOI18N
+        btAccept.setText(bundle.getString("OK")); // NOI18N
 
-        bt.setText("Cancelar");
-        bt.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btActionPerformed(evt);
-            }
-        });
+        btCancel.setText(bundle.getString("CANCEL")); // NOI18N
+
+        lbTitle.setText(bundle.getString("GAME_TITLE")); // NOI18N
+
+        lbStatus.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -112,44 +130,47 @@ public class GameSelectionView extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1)
             .addGroup(layout.createSequentialGroup()
-                .addGap(115, 115, 115)
-                .addComponent(btAccept)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(bt)
-                .addContainerGap(118, Short.MAX_VALUE))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lbTitle)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btAccept)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btCancel)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(lbStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 264, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lbTitle)
+                    .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btAccept)
-                    .addComponent(bt))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btCancel))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(6, 6, 6))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btAcceptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAcceptActionPerformed
-        if ( lstGames.getSelectedValue() != null ){
-            this._ok = true ;
-            this.dispose();
-        }
-        else
-            JOptionPane.showMessageDialog(this, "Seleccionar algún juego");
-    }//GEN-LAST:event_btAcceptActionPerformed
-
-    private void btActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btActionPerformed
-        this.dispose();
-    }//GEN-LAST:event_btActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton bt;
     private javax.swing.JButton btAccept;
+    private javax.swing.JButton btCancel;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lbStatus;
+    private javax.swing.JLabel lbTitle;
     private javax.swing.JList lstGames;
+    private javax.swing.JTextField txtTitle;
     // End of variables declaration//GEN-END:variables
 }

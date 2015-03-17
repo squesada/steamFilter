@@ -62,6 +62,25 @@ public abstract class AbstractPlatformGame {
         return (_platform);
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        return (
+                (obj != null)
+                && (obj instanceof AbstractPlatformGame)
+                && (this._id == ((AbstractPlatformGame) obj)._id)
+                && (this._name.equals(((AbstractPlatformGame) obj)._name))
+                && (this._platform == ((AbstractPlatformGame) obj)._platform)
+                );
+    }
+        
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + this._id;
+        hash = 97 * hash + (this._name != null ? this._name.hashCode() : 0);
+        hash = 97 * hash + (this._platform != null ? this._platform.hashCode() : 0);
+        return hash;
+    }
     public enum Platform{
         STEAM('S', "Steam") , ORIGIN('O', "Origin") , DESURA('D', "Desura") , UPLAY('U', "Uplay") , GOG('G', "GOG"), DEFAULT_PLATFORM('?',"Default");
         private char _prefix;
@@ -74,13 +93,6 @@ public abstract class AbstractPlatformGame {
         
         public char getPrefix(){
             return(_prefix);
-        }
-        
-        /*
-        @Override
-        public String toString() {
-            return(_name);
-        }
-        */
+        }        
     }
 }

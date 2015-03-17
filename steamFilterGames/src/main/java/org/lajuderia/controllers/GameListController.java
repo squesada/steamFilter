@@ -39,7 +39,9 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import org.lajuderia.beans.Game;
 import org.lajuderia.models.GameListModel;
+import org.lajuderia.models.GameSelectionModel;
 import org.lajuderia.views.GameListView;
+import org.lajuderia.views.GameSelectionView;
 
 /**
  *
@@ -54,8 +56,7 @@ public class GameListController implements Observer {
         this._view = view ;
         this._model = model ;        
         
-        _view.registerListener(_listener);        
-            
+        _view.registerListener(_listener);            
         _model.addObserver(GameListController.this);
     }
 
@@ -71,7 +72,7 @@ public class GameListController implements Observer {
         _model.saveGamesToDisk();
     }
     
-    private void updateGamesWithMetaInfo() {
+    private void updateGamesWithMetaInfoAuto() {
         List<String> gameIds;
             gameIds = new ArrayList<String>();
             for ( int row : _view.getSelectedTableRows() ) {
@@ -85,8 +86,6 @@ public class GameListController implements Observer {
         GameListTableModel model;
             model = new GameListTableModel();
             
-            _view.setTableModel(model);
-
             Iterator<Game> it = _model.getGamesIterator();
             
             while ( it.hasNext() ){
@@ -94,6 +93,7 @@ public class GameListController implements Observer {
             }
             
             model.addTableModelListener(_listener);
+            _view.setTableModel(model);            
     }
     
     private Object[] createArrayFromGame(Game game){
@@ -111,6 +111,25 @@ public class GameListController implements Observer {
             row[5] = game.isCompleted();
             
             return ( row );
+    }
+    
+    private void updateGameWithMetaInfoManual() {
+        Game selectedGame = _model.findGameById((String) _view.getTableValueAt(_view.getSelectedTableRows()[0],GameListTableModel.ID_NUM_COLUMN));
+        
+        GameSelectionModel selectionModel = new GameSelectionModel();
+        GameSelectionView selectionView;
+            selectionView = new GameSelectionView(_view);            
+            selectionView.setEnteredTitle(selectedGame.getTitle());
+        
+        GameSelectionController selectionController = new GameSelectionController(selectionView,selectionModel);
+            selectionView.setVisible(true);
+            
+        if ( selectionController.wasOk() ) {
+            new UpdateGameWithMetaInformationWorker(
+                    selectedGame.getId(),
+                    selectionController.getSelectedMetaInformation().getTitle()
+            ).execute();
+        }
     }
     
     private class GameListTableModel extends DefaultTableModel{
@@ -160,7 +179,7 @@ public class GameListController implements Observer {
                     || (column == NAME_NUM_COLUMN)
                     || (column == GENRE_NUM_COLUMN)
                 );
-        }       
+        }
     }
     
     private class GameListListener implements ActionListener, TableModelListener {
@@ -211,7 +230,7 @@ public class GameListController implements Observer {
                         resultMessage = msgBundle.getString("OPERATION_CANCELLED");
                 }
                 else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC"))) {
-                    updateGamesWithMetaInfo();
+                    updateGamesWithMetaInfoAuto();
                     resultMessage = msgBundle.getString("METACRITIC_INFO_EXECUTED");
                 } else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC_MANUAL"))) {
                     if ( _view.getSelectedTableRows().length == 1 ) {
@@ -240,11 +259,7 @@ public class GameListController implements Observer {
                         break ;
                     default:                       
                 } 
-        }
-        
-        private void updateGameWithMetaInfoManual() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+        }        
     }
     
     
@@ -260,7 +275,7 @@ public class GameListController implements Observer {
             int count = 0 ;
             
             for ( String gameId : _gameIds ) {
-                if ( _model.updateGameWithMetaInfo(gameId) ) {
+                if ( _model.updateGameWithMetaInfoAuto(gameId) ) {
                     ++count;
                     publish(count);
                 }
@@ -281,7 +296,7 @@ public class GameListController implements Observer {
         }        
     }
     
-    public class LoadSteamGamesWorker extends SwingWorker<Void, Integer> {
+    public class LoadSteamGamesWorker extends SwingWorker<Void, Void> {
         private final long _steamId;
         private int _loadedGamesCount;
         
@@ -298,8 +313,31 @@ public class GameListController implements Observer {
         
         @Override
         protected void done(){
-            _model.notifyObservers();
             _view.setMessageStatus(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("STEAM_LOADED"), _loadedGamesCount));
+        }        
+    }
+    
+    public class UpdateGameWithMetaInformationWorker extends SwingWorker<Void,Void> {
+        private final String _gameId;
+        private final String _title;
+        
+        public UpdateGameWithMetaInformationWorker(String gameId, String title) {
+            this._gameId = gameId;
+            this._title = title;
+        }
+        
+        @Override
+        protected Void doInBackground() throws Exception {
+            _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_EXECUTED"));
+            _model.updateGameWithMetaInfoManual(_gameId, _title);
+            
+            return ( null );
+        }
+
+        @Override
+        protected void done() {
+            _model.notifyObservers();
+            _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
         }        
     }
 }

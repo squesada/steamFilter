@@ -21,43 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package org.lajuderia.models;
 
-package org.lajuderia.daos;
-
-import org.lajuderia.communication.SteamAPI;
-import org.lajuderia.beans.SteamGame;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Observable;
 import org.lajuderia.beans.MetaInformation;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.lajuderia.daos.MetaInformationDAO;
 
 /**
  *
  * @author Sergio
  */
-public class SteamGameDAO {
-    public static List<SteamGame> getUserOwnedGames(long userId) {
-        List<SteamGame> gameList = new ArrayList<SteamGame>();
-        JSONObject jsonGames = null ;
-            try {
-                jsonGames = SteamAPI.getUserOwnedGames(userId);
-            }
-            catch(IOException iex){
-            }
-            if ( jsonGames != null ) {
-                for ( int i = 0 ; i < jsonGames.getJSONObject("response").getJSONArray("games").length() ; i++)
-                {
-                    gameList.add(readGameFromSteamJson(jsonGames.getJSONObject("response").getJSONArray("games").getJSONObject(i)));
-                }
-            }
-            
-        return(gameList);
+public class GameSelectionModel extends Observable {
+    private List<MetaInformation> _gameList;
+    
+    public GameSelectionModel(){
+        
     }
     
-    private static SteamGame readGameFromSteamJson(JSONObject json){
-        return ( new SteamGame(json.getInt("appid"),json.getString("name")) );
+    public int updateModelWithSimilarMetainfoTo(String title) {
+        _gameList = MetaInformationDAO.getSimilarGamesFromMetacritic(title);
+        setChanged();
+        notifyObservers();
+        
+        return ( _gameList.size() );
+    }
+    
+    public Iterator<MetaInformation> getMetaInformationIterator() {
+        Iterator it = null ;
+            if ( _gameList != null ) {
+                it = _gameList.iterator();
+            }
+            
+        return ( it );
     }
 }

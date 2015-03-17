@@ -102,7 +102,7 @@ public class SteamAPI {
       }
     }
 
-    public static JSONArray getSimilarMetacriticGames(String metaName) {
+    public static JSONArray getSimilarMetacriticGames(String metaTitle) {
         JSONArray similarGames = null;
         HttpResponse<JsonNode> response;
             try{
@@ -113,7 +113,7 @@ public class SteamAPI {
                     .field("max_pages", 1)
                     .field("platform", "3")
                     .field("retry","4")
-                    .field("title", metaName)
+                    .field("title", metaTitle)
                     .asJson();
                 
                     if ( response.getBody().getObject().has("results") )

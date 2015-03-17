@@ -31,10 +31,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Observable;
-import org.json.JSONObject;
 import org.lajuderia.beans.Game;
 import org.lajuderia.beans.MetaInformation;
-import org.lajuderia.communication.SteamAPI;
+import org.lajuderia.daos.MetaInformationDAO;
 import org.lajuderia.daos.SteamGameDAO;
 
 /**
@@ -89,23 +88,21 @@ public class GameListModel extends Observable {
             return ( newGameList );
     }
     
+    public boolean updateGameWithMetaInfoAuto(String gameId) {
+        return ( updateGameWithMetaInfoManual(gameId, null) ) ;
+    }
     
-    
-    public boolean updateGameWithMetaInfo(String gameId) {
+    public boolean updateGameWithMetaInfoManual(String gameId, String title) {
         boolean gameChanged = false ;
         Game theGame = _gamesMap.get(gameId);
         
         if ( theGame != null ) {
-            MetaInformation metaInformation = null;
-            JSONObject json;
-                json = SteamAPI.getMetacriticInfo(theGame.getTitle());
-                if ( json != null ) {
-                    metaInformation = readGameFromMetacriticJSon(json);
-                }
+            MetaInformation metaInformation = MetaInformationDAO.getMetaInfoByTitle(title != null ? title : theGame.getTitle());
                 
             if ( metaInformation != null && (!theGame.hasMetaInformation() || !metaInformation.equals(theGame.getMetaInformation())) ) {
                 theGame.setMetaInformation(metaInformation);
                 setChanged();
+                
                 gameChanged = true;
             }
         }
@@ -116,23 +113,11 @@ public class GameListModel extends Observable {
         return ( gameChanged ) ;
     }
     
-    private static MetaInformation readGameFromMetacriticJSon(JSONObject gameInfo) {
-        String title = !gameInfo.isNull("name") && gameInfo.get("name") instanceof String
-            ? gameInfo.getString("name")
-            : "";
-        String summary = !gameInfo.isNull("summary") && gameInfo.get("summary") instanceof String 
-            ? gameInfo.getString("summary") 
-            : "";
-        String genre = !gameInfo.isNull("genre") && gameInfo.get("genre") instanceof String 
-            ? gameInfo.getString("genre") 
-            : "";
-        int metascore = !gameInfo.isNull("score") && gameInfo.get("score") instanceof String && gameInfo.getString("score").matches("\\d*")
-            ? gameInfo.getInt("score") 
-            : 0 ;
-        int userscore = !gameInfo.isNull("userscore") && gameInfo.get("userscore") instanceof Double 
-            ? (int) (gameInfo.getDouble("userscore")*10) 
-            : 0;
-
-        return ( new MetaInformation(title, summary, genre, metascore, userscore) ) ;
+    public void insertGame(Game game){
+        Game oldGame = _gamesMap.put(game.getId(), game);
+        if ( !game.equals(oldGame) ){
+            setChanged();
+            notifyObservers();
+        }        
     }
 }
