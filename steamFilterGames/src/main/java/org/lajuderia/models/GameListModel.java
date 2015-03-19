@@ -27,10 +27,10 @@ package org.lajuderia.models;
 import java.util.ArrayList;
 import org.lajuderia.communication.Xml;
 import org.lajuderia.beans.SteamGame;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Observable;
+import java.util.ResourceBundle;
+import javax.swing.table.AbstractTableModel;
 import org.lajuderia.beans.Game;
 import org.lajuderia.beans.MetaInformation;
 import org.lajuderia.daos.MetaInformationDAO;
@@ -40,84 +40,221 @@ import org.lajuderia.daos.SteamGameDAO;
  *
  * @author Sergio
  */
-public class GameListModel extends Observable {
-    private HashMap<String, Game> _gamesMap ;
-    
-    public GameListModel () {
-        this._gamesMap = new HashMap<String, Game>();
-    }
+public class GameListModel extends AbstractTableModel {
+    public static final int ID_NUM_COLUMN = 0 ;
+    public static final int TITLE_NUM_COLUMN = 1 ;
+    public static final int GENRE_NUM_COLUMN = 2 ;
+    public static final int METASCORE_NUM_COLUMN = 3 ;
+    public static final int USERSCORE_NUM_COLUMN = 4 ;
+    public static final int COMPLETED_NUM_COLUMN = 5 ;
+    private final ResourceBundle textBundle =
+            java.util.ResourceBundle.getBundle("TextsBundle");
+
+    private final String[] COLUMN_TITLES  = {
+        textBundle.getString("GAME_ID"),
+        textBundle.getString("GAME_TITLE"),
+        textBundle.getString("GAME_GENRE"),
+        textBundle.getString("GAME_METASCORE"),
+        textBundle.getString("GAME_USERSCORE"),
+        textBundle.getString("GAME_COMPLETED")
+    };
+
+    private ArrayListGame _gameList = new ArrayListGame();
     
     public void loadGamesFromDisk() throws Exception {        
-        _gamesMap = Xml.loadGamesFromDisk();
-        setChanged();
-        notifyObservers();
+        boolean hasChanged = false;
+        
+        for ( Game game : Xml.loadGamesFromDisk() ) {
+            if ( _gameList.findGameById(game.getId()) == null ) {
+                _gameList.add(game);
+                hasChanged = true;
+            }
+        }
+        
+        if ( hasChanged )
+            fireTableDataChanged();
     }
     
     public Game findGameById(String id){
-        return ( _gamesMap.get(id) ) ;
+        return ( _gameList.findGameById(id) ) ;
     }
 
     /**
      * @return the _gamesMap
      */
     public Iterator<Game> getGamesIterator() {
-        return _gamesMap.values().iterator();
+        return _gameList.iterator();
     }
 
     public void saveGamesToDisk() throws Exception {
-        Xml.saveGamesToDisk(_gamesMap.values());
+        Xml.saveGamesToDisk(_gameList);
     }
     
     public List<Game> getUpdatedGameListFromSteam(long userId) {
         //TODO: Verificar que el usuario existe y tiene el perfil público
+        
+        boolean hasChanged = false;
         
         List<Game> newGameList;
             newGameList = new ArrayList<Game>();
             for ( SteamGame currentGame : SteamGameDAO.getUserOwnedGames(userId)) {
                 Game newGame = new Game(currentGame);
                 
-                if ( _gamesMap.get(newGame.getId()) == null ) {
-                    setChanged();
-                    _gamesMap.put(newGame.getId(), newGame);
+                if ( _gameList.findGameById(newGame.getId()) == null ) {
+                   _gameList.add(newGame);
                     newGameList.add(newGame);
+                    hasChanged = true;
                 }
             }
             
-            notifyObservers();
+            if ( hasChanged )
+                fireTableDataChanged();
             
             return ( newGameList );
     }
     
     public boolean updateGameWithMetaInfoAuto(String gameId) {
-        return ( updateGameWithMetaInfoManual(gameId, null) ) ;
+        boolean result = updateGameWithMetaInfoManual(gameId, null);
+        if ( result )
+            fireTableDataChanged();
+        
+        return ( result );
     }
     
     public boolean updateGameWithMetaInfoManual(String gameId, String title) {
         boolean gameChanged = false ;
-        Game theGame = _gamesMap.get(gameId);
+        Game theGame = _gameList.findGameById(gameId);
         
         if ( theGame != null ) {
             MetaInformation metaInformation = MetaInformationDAO.getMetaInfoByTitle(title != null ? title : theGame.getTitle());
                 
             if ( metaInformation != null && (!theGame.hasMetaInformation() || !metaInformation.equals(theGame.getMetaInformation())) ) {
                 theGame.setMetaInformation(metaInformation);
-                setChanged();
                 
                 gameChanged = true;
             }
         }
         else {
-            //TODO: lanzar error si no existe el juego en el hash
+            //TODO: lanzar error si no existe el juego en la lista
         }
+        if ( gameChanged )
+            fireTableDataChanged();
         
         return ( gameChanged ) ;
     }
     
-    public void insertGame(Game game){
-        Game oldGame = _gamesMap.put(game.getId(), game);
-        if ( !game.equals(oldGame) ){
-            setChanged();
-            notifyObservers();
+    @Override
+    public Class getColumnClass(int columnIndex) {
+        Class columnClass;
+
+        if ( columnIndex == COMPLETED_NUM_COLUMN )
+            columnClass = java.lang.Boolean.class;
+        else if ( ( columnIndex == METASCORE_NUM_COLUMN )
+                || ( columnIndex == USERSCORE_NUM_COLUMN )
+                )
+            columnClass = java.lang.Integer.class;
+        else
+            columnClass = java.lang.String.class;
+
+        return (columnClass);
+    }
+
+    @Override
+    public boolean isCellEditable(int row, int column){
+        return (
+                (column == COMPLETED_NUM_COLUMN)
+                || (column == TITLE_NUM_COLUMN)
+                || (column == GENRE_NUM_COLUMN)
+            );
+    }
+
+    public int getRowCount() {
+        return ( _gameList.size() );
+    }
+
+    public int getColumnCount() {
+        return ( COLUMN_TITLES.length );
+    }
+
+    @Override
+    public String getColumnName(int i) {
+        return ( COLUMN_TITLES[i] );
+    }
+    
+    
+    public Object getValueAt(int row, int col ){
+        Object result = null ;
+        
+        switch ( col ) {
+            case ID_NUM_COLUMN:
+                result = _gameList.get(row).getId();
+                break;
+            case TITLE_NUM_COLUMN:
+                result = _gameList.get(row).getTitle();
+                break;
+            case GENRE_NUM_COLUMN:
+                result = _gameList.get(row).getGenre();
+                break;
+            case METASCORE_NUM_COLUMN:
+                if ( _gameList.get(row).hasMetaInformation() )
+                    result = _gameList.get(row).getMetaInformation().getMetascore();
+                break;
+            case USERSCORE_NUM_COLUMN:
+                if ( _gameList.get(row).hasMetaInformation() )
+                    result = _gameList.get(row).getMetaInformation().getUserscore();
+                break;
+            case COMPLETED_NUM_COLUMN:
+                result = _gameList.get(row).isCompleted();
+                break;
+        }
+        
+        return ( result );
+    }
+
+    @Override
+    public void setValueAt(Object value, int row, int col) {
+        
+        switch ( col ) {
+            case TITLE_NUM_COLUMN:
+                _gameList.get(row).setTitle(value.toString());
+                break;
+            case GENRE_NUM_COLUMN:
+                _gameList.get(row).setGenre(value.toString());
+                break;
+            case COMPLETED_NUM_COLUMN:
+                _gameList.get(row).setCompleted((Boolean) value);
+                break;
+        }
+    }
+    
+    private class ArrayListGame extends ArrayList<Game> {
+        public Game findGameById(String id) {            
+            return ( getGameByIdAux(id, 0, this.size()-1 ));
+        }
+        
+        private Game getGameByIdAux(String id, int numFrom, int numTo) {
+            Game foundGame = null;
+            
+            if ( numFrom <= numTo ) {
+                switch(numTo-numFrom) {
+                    case 1:
+                        if ( this.get(numTo).getId().equals(id) )
+                            foundGame = get(numTo);
+                        else if ( this.get(numFrom).getId().equals(id) )
+                            foundGame = get(numFrom);
+                        break;
+                    case 0:
+                        if ( this.get(numTo).getId().equals(id) )
+                            foundGame = get(numTo);
+                        break;
+                    default:
+                        foundGame = getGameByIdAux(id, numFrom, (numFrom+numTo)/2);
+                        if ( foundGame == null )
+                            foundGame = getGameByIdAux(id, (numFrom+numTo)/2+1, numTo);
+                }
+            }
+            
+            return ( foundGame );
         }        
     }
 }

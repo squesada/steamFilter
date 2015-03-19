@@ -44,7 +44,7 @@ import org.lajuderia.views.GameSelectionView;
  *
  * @author Sergio
  */
-public class GameSelectionController implements Observer {
+public class GameSelectionController {
     private final GameSelectionModel _model;
     private final GameSelectionView _view;
     private final GameSelectionListener _listener = new GameSelectionListener();
@@ -59,23 +59,11 @@ public class GameSelectionController implements Observer {
         _view.registerActionListener(_listener);
         _view.registerKeyListener(_listener);
         _view.registerListSelectionListener(_listener);
+        _view.setListModel(_model);
             
-        _model.addObserver(GameSelectionController.this);
-        
         _view.setAllowToAccept(false);
         
         updateGameList();
-    }
-
-    public void update(Observable o, Object o1) {
-        DefaultListModel model = new DefaultListModel();
-            Iterator<MetaInformation> it = _model.getMetaInformationIterator();
-            
-            while ( it.hasNext() ){
-               model.addElement(it.next());
-            }
-            
-            _view.setListModel(model);
     }
     
     private void updateGameList() {

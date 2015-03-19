@@ -27,16 +27,12 @@ package org.lajuderia.controllers ;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 import org.lajuderia.beans.Game;
 import org.lajuderia.models.GameListModel;
 import org.lajuderia.models.GameSelectionModel;
@@ -47,17 +43,18 @@ import org.lajuderia.views.GameSelectionView;
  *
  * @author Sergio
  */
-public class GameListController implements Observer {
+public class GameListController {
     private final GameListView _view ;
     private final GameListModel _model ;
     GameListListener _listener = new GameListListener();
     
     public GameListController(GameListView view, GameListModel model) {
         this._view = view ;
-        this._model = model ;        
+        this._model = model ;
         
-        _view.registerListener(_listener);            
-        _model.addObserver(GameListController.this);
+        this._view.setTableModel(_model);
+        
+        _view.registerListener(_listener);
     }
 
     private void importGamesFromSteam(long steamID) throws Exception {        
@@ -75,110 +72,27 @@ public class GameListController implements Observer {
     private void updateGamesWithMetaInfoAuto() {
         List<String> gameIds;
             gameIds = new ArrayList<String>();
-            for ( int row : _view.getSelectedTableRows() ) {
-                gameIds.add((String) _view.getTableValueAt(row,GameListTableModel.ID_NUM_COLUMN));
+            for ( int row : _view.getSelectedModelRows() ) {
+                gameIds.add((String) _model.getValueAt(row, GameListModel.ID_NUM_COLUMN));
             }
         
         new LoadMetacriticInfoWorker(gameIds).execute();
     }
     
-    public void update(Observable o, Object o1) {
-        GameListTableModel model;
-            model = new GameListTableModel();
-            
-            Iterator<Game> it = _model.getGamesIterator();
-            
-            while ( it.hasNext() ){
-               model.addRow(createArrayFromGame(it.next()));
-            }
-            
-            model.addTableModelListener(_listener);
-            _view.setTableModel(model);            
-    }
-    
-    private Object[] createArrayFromGame(Game game){
-        Object[] row ;
-            row = new Object[6];
-            row[0] = game.getId();
-            row[1] = game.getTitle();
-            row[2] = game.getGenre();
-            row[3] = game.hasMetaInformation()
-                    ? game.getMetaInformation().getMetascore()
-                    : null ;
-            row[4] = game.hasMetaInformation()
-                    ? game.getMetaInformation().getUserscore()
-                    : null ;
-            row[5] = game.isCompleted();
-            
-            return ( row );
-    }
-    
     private void updateGameWithMetaInfoManual() {
-        Game selectedGame = _model.findGameById((String) _view.getTableValueAt(_view.getSelectedTableRows()[0],GameListTableModel.ID_NUM_COLUMN));
-        
         GameSelectionModel selectionModel = new GameSelectionModel();
         GameSelectionView selectionView;
             selectionView = new GameSelectionView(_view);            
-            selectionView.setEnteredTitle(selectedGame.getTitle());
+            selectionView.setEnteredTitle((String) _model.getValueAt(_view.getSelectedModelRows()[0], GameListModel.TITLE_NUM_COLUMN));
         
         GameSelectionController selectionController = new GameSelectionController(selectionView,selectionModel);
             selectionView.setVisible(true);
             
         if ( selectionController.wasOk() ) {
             new UpdateGameWithMetaInformationWorker(
-                    selectedGame.getId(),
+                    (String) _model.getValueAt(_view.getSelectedModelRows()[0], GameListModel.ID_NUM_COLUMN),
                     selectionController.getSelectedMetaInformation().getTitle()
             ).execute();
-        }
-    }
-    
-    private class GameListTableModel extends DefaultTableModel{
-        public static final int ID_NUM_COLUMN = 0 ;
-        public static final int NAME_NUM_COLUMN = 1 ;
-        public static final int GENRE_NUM_COLUMN = 2 ;
-        public static final int METASCORE_NUM_COLUMN = 3 ;
-        public static final int USERSCORE_NUM_COLUMN = 4 ;
-        public static final int COMPLETED_NUM_COLUMN = 5 ;
-        private final ResourceBundle textBundle =
-                java.util.ResourceBundle.getBundle("TextsBundle");
-        
-        private final String[] TABLE_TITLES = {
-            textBundle.getString("GAME_ID"),
-            textBundle.getString("GAME_TITLE"),
-            textBundle.getString("GAME_GENRE"),
-            textBundle.getString("GAME_METASCORE"),
-            textBundle.getString("GAME_USERSCORE"),
-            textBundle.getString("GAME_COMPLETED")
-        };
-        
-        public GameListTableModel(){
-            super();
-            this.setColumnIdentifiers(TABLE_TITLES);
-        }
-        
-        @Override
-        public Class getColumnClass(int columnIndex) {
-            Class columnClass;
-
-            if ( columnIndex == COMPLETED_NUM_COLUMN )
-                columnClass = java.lang.Boolean.class;
-            else if ( ( columnIndex == METASCORE_NUM_COLUMN )
-                    || ( columnIndex == USERSCORE_NUM_COLUMN )
-                    )
-                columnClass = java.lang.Integer.class;
-            else
-                columnClass = java.lang.String.class;
-
-            return (columnClass);
-        }
-        
-        @Override
-        public boolean isCellEditable(int row, int column){
-            return (
-                    (column == COMPLETED_NUM_COLUMN)
-                    || (column == NAME_NUM_COLUMN)
-                    || (column == GENRE_NUM_COLUMN)
-                );
         }
     }
     
@@ -233,11 +147,15 @@ public class GameListController implements Observer {
                     updateGamesWithMetaInfoAuto();
                     resultMessage = msgBundle.getString("METACRITIC_INFO_EXECUTED");
                 } else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC_MANUAL"))) {
-                    if ( _view.getSelectedTableRows().length == 1 ) {
+                    if ( _view.getSelectedModelRows().length == 1 ) {
                         updateGameWithMetaInfoManual();
                     }
                     else
                         resultMessage = msgBundle.getString("SELECT_JUST_ONE_GAME");
+                }
+                else if ( command.equals(lblBundle.getString("ADD_GAME"))) {
+                    addNewGameToModel();
+                    resultMessage = msgBundle.getString("GAME_ADDED");
                 }
                 _view.setMessageStatus(resultMessage);
             } catch (Exception ex) {
@@ -246,22 +164,26 @@ public class GameListController implements Observer {
         }
 
         public void tableChanged(TableModelEvent tme) {
-            Game theGame = _model.findGameById((String) _view.getTableModelValueAt(tme.getLastRow(), 0)) ;
+            Game theGame = _model.findGameById((String) _model.getValueAt(tme.getLastRow(), 0)) ;
                 switch ( tme.getColumn() ) {
-                    case GameListTableModel.NAME_NUM_COLUMN:
-                        theGame.setTitle((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                    case GameListModel.TITLE_NUM_COLUMN:
+                        theGame.setTitle((String) _model.getValueAt(tme.getLastRow(), tme.getColumn()));
                         break ;
-                    case GameListTableModel.GENRE_NUM_COLUMN:
-                        theGame.setGenre((String) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                    case GameListModel.GENRE_NUM_COLUMN:
+                        theGame.setGenre((String) _model.getValueAt(tme.getLastRow(), tme.getColumn()));
                         break ;
-                    case GameListTableModel.COMPLETED_NUM_COLUMN:
-                        theGame.setCompleted((Boolean) _view.getTableModelValueAt(tme.getLastRow(), tme.getColumn()));
+                    case GameListModel.COMPLETED_NUM_COLUMN:
+                        theGame.setCompleted((Boolean) _model.getValueAt(tme.getLastRow(), tme.getColumn()));
                         break ;
                     default:                       
                 } 
         }        
+
+        private void addNewGameToModel() {
+            //TODO: Crear dialog de introducción de info
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
     }
-    
     
     public class LoadMetacriticInfoWorker extends SwingWorker<Void, Integer> {
         private final List<String> _gameIds;
@@ -291,7 +213,6 @@ public class GameListController implements Observer {
         
         @Override
         protected void done(){
-            _model.notifyObservers();
             _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
         }        
     }
@@ -336,7 +257,6 @@ public class GameListController implements Observer {
 
         @Override
         protected void done() {
-            _model.notifyObservers();
             _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
         }        
     }

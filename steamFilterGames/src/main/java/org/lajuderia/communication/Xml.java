@@ -25,10 +25,9 @@
 package org.lajuderia.communication;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import org.lajuderia.beans.MetaInformation;
-import org.lajuderia.beans.SteamGame;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,8 +50,8 @@ import org.w3c.dom.NamedNodeMap;
  * @author Sergio
  */
 public class Xml {
-    public static HashMap<String,Game> loadGamesFromDisk() throws Exception {        
-        HashMap<String,Game> gamesMap = new HashMap<String,Game>();
+    public static List<Game> loadGamesFromDisk() throws Exception {        
+        List<Game> gameList = new ArrayList<Game>();
         
         Document doc ;
             doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new java.io.File("steamgames.xml"));
@@ -60,10 +59,10 @@ public class Xml {
             for ( int i = 0 ; i < doc.getDocumentElement().getChildNodes().getLength() ; i++){
                  Game game;
                     game = readGameFromNamedNodeMap(doc.getDocumentElement().getChildNodes().item(i).getAttributes()) ;
-                    gamesMap.put(game.getId(), game);
+                    gameList.add(game);
             }
             
-            return ( gamesMap ) ;
+            return ( gameList ) ;
     }
 
     public static void saveGamesToDisk(Collection<Game> gameList) throws Exception {
@@ -107,7 +106,7 @@ public class Xml {
 
     private static Game readGameFromNamedNodeMap(NamedNodeMap nodeMap) {
         Game game ;
-            game = new Game() ;
+            game = new Game();
             game.setTitle(nodeMap.getNamedItem("title").getNodeValue());
             game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
             game.setCompleted(Boolean.parseBoolean(nodeMap.getNamedItem("completed").getNodeValue()));

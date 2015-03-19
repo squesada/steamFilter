@@ -38,6 +38,8 @@
                       <Component id="btMetacritic" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btMetaSimilar" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="btAddGame" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
@@ -59,6 +61,7 @@
                   <Component id="btSaveXML" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btMetacritic" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btMetaSimilar" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btAddGame" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jScrollPane1" min="-2" pref="418" max="-2" attributes="0"/>
@@ -123,6 +126,13 @@
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="LabelsBundle.properties" key="IMPORT_METACRITIC_MANUAL" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="btAddGame">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="LabelsBundle.properties" key="ADD_GAME" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

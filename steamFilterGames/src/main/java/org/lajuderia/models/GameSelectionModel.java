@@ -23,9 +23,10 @@
  */
 package org.lajuderia.models;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Observable;
+import javax.swing.AbstractListModel;
 import org.lajuderia.beans.MetaInformation;
 import org.lajuderia.daos.MetaInformationDAO;
 
@@ -33,18 +34,13 @@ import org.lajuderia.daos.MetaInformationDAO;
  *
  * @author Sergio
  */
-public class GameSelectionModel extends Observable {
-    private List<MetaInformation> _gameList;
-    
-    public GameSelectionModel(){
-        
-    }
+public class GameSelectionModel extends AbstractListModel {
+    private List<MetaInformation> _gameList = new ArrayList<MetaInformation>();
     
     public int updateModelWithSimilarMetainfoTo(String title) {
         _gameList = MetaInformationDAO.getSimilarGamesFromMetacritic(title);
-        setChanged();
-        notifyObservers();
-        
+        fireContentsChanged(this, 0, _gameList.size()-1);
+                
         return ( _gameList.size() );
     }
     
@@ -55,5 +51,13 @@ public class GameSelectionModel extends Observable {
             }
             
         return ( it );
+    }
+
+    public int getSize() {
+        return (_gameList.size());
+    }
+
+    public Object getElementAt(int i) {
+        return ( _gameList.get(i) );
     }
 }

@@ -36,11 +36,10 @@ import org.lajuderia.communication.SteamAPI;
  */
 public class MetaInformationDAO {
     public static List<MetaInformation> getSimilarGamesFromMetacritic(String title){
-        List<MetaInformation> metaInformation = null ;
+        List<MetaInformation> metaInformation = new ArrayList<MetaInformation>();
         JSONArray jsonMetacritic;
             jsonMetacritic = SteamAPI.getSimilarMetacriticGames(title);
-            if ( jsonMetacritic != null ){
-                metaInformation = new ArrayList<MetaInformation>();
+            if ( jsonMetacritic != null ){                
                 for ( int i = 0 ; i < jsonMetacritic.length() ; i++ )
                     metaInformation.add(readGameFromMetacriticJSon(jsonMetacritic.getJSONObject(i)));
             }

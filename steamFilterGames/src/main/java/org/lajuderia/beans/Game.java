@@ -35,9 +35,9 @@ public class Game {
     private boolean _completed;
     
     public Game(){
-        
+        _platformGame = new DefaultPlatformGame();
     }
-    
+        
     public Game(AbstractPlatformGame platformGame) {
         this._title = platformGame.getTitle();
         this._platformGame = platformGame ;
@@ -60,10 +60,10 @@ public class Game {
     }
 
     /**
-     * @param name the _title to set
+     * @param title the title to set
      */
-    public void setTitle(String name) {
-        this._title = name;
+    public void setTitle(String title) {
+        this._title = title;
     }
 
     /**
@@ -91,7 +91,7 @@ public class Game {
      * @param associatedGame the _platformGame to set
      */
     public void setAssociatedGame(AbstractPlatformGame associatedGame) {
-        this._platformGame = associatedGame;
+        this._platformGame = associatedGame;        
     }
 
     /**
@@ -106,8 +106,10 @@ public class Game {
      */
     public void setMetaInformation(MetaInformation metaInformation) {
         this._metaInformation = metaInformation;
-        
-        if ( (_genre == null) || (_genre.isEmpty()) )
+
+        if ( ( metaInformation != null) && 
+                ((_genre == null) || (_genre.isEmpty()))
+                )
             _genre = metaInformation.getGenre();
     }
 
@@ -119,10 +121,10 @@ public class Game {
     }
 
     /**
-     * @param _completed the _completed to set
+     * @param completed the _completed to set
      */
-    public void setCompleted(boolean _completed) {
-        this._completed = _completed;
+    public void setCompleted(boolean completed) {
+        this._completed = completed;
     }
     
     public boolean hasMetaInformation(){
