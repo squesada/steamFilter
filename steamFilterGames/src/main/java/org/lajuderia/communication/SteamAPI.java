@@ -107,7 +107,7 @@ public class SteamAPI {
         HttpResponse<JsonNode> response;
             try{
                 response = Unirest.post("https://byroredux-metacritic.p.mashape.com/search/game")
-                    .header("X-Mashape-Key", "G5NcKQ7DwcmshtGXF1x3xcO9lYfKp1NvwSwjsnOPcUtdDaAvXp")
+                    .header("X-Mashape-Key", METACRITIC_DEV_KEY)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .header("Accept", "application/json")
                     .field("max_pages", 1)
