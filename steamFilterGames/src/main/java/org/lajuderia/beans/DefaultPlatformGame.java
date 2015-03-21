@@ -31,6 +31,6 @@ package org.lajuderia.beans;
 public class DefaultPlatformGame extends AbstractPlatformGame{
     
     public DefaultPlatformGame(){
-        super(Platform.DEFAULT_PLATFORM);
+        super(PlatformGame.DEFAULT_PLATFORM);
     }
 }

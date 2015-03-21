@@ -47,7 +47,6 @@ public class Main {
         GameListView view = new GameListView();
         GameListModel model = new GameListModel();
         GameListController controller = new GameListController(view, model);
-
-        view.setVisible(true);
+            view.setVisible(true);
     }
 }

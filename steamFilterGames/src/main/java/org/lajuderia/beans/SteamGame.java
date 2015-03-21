@@ -31,9 +31,9 @@ package org.lajuderia.beans;
 public class SteamGame extends AbstractPlatformGame{
     
     public SteamGame(){
-        super(Platform.STEAM);
+        super(PlatformGame.STEAM);
     }
     public SteamGame(int id , String name){
-        super(id, name, Platform.STEAM);
+        super(id, name, PlatformGame.STEAM);
     }
 }

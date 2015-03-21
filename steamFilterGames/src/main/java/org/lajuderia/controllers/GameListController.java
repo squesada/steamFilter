@@ -26,18 +26,17 @@ package org.lajuderia.controllers ;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import org.lajuderia.beans.Game;
+import org.lajuderia.models.AddGameModel;
 import org.lajuderia.models.GameListModel;
 import org.lajuderia.models.GameSelectionModel;
+import org.lajuderia.views.AddGameView;
 import org.lajuderia.views.GameListView;
 import org.lajuderia.views.GameSelectionView;
+import org.lajuderia.views.ShowGameView;
 
 /**
  *
@@ -70,13 +69,7 @@ public class GameListController {
     }
     
     private void updateGamesWithMetaInfoAuto() {
-        List<String> gameIds;
-            gameIds = new ArrayList<String>();
-            for ( int row : _view.getSelectedModelRows() ) {
-                gameIds.add((String) _model.getValueAt(row, GameListModel.ID_NUM_COLUMN));
-            }
-        
-        new LoadMetacriticInfoWorker(gameIds).execute();
+        new LoadMetacriticInfoWorker(_view.getSelectedModelRows()).execute();
     }
     
     private void updateGameWithMetaInfoManual() {
@@ -90,13 +83,48 @@ public class GameListController {
             
         if ( selectionController.wasOk() ) {
             new UpdateGameWithMetaInformationWorker(
-                    (String) _model.getValueAt(_view.getSelectedModelRows()[0], GameListModel.ID_NUM_COLUMN),
+                    _view.getSelectedModelRows()[0],
                     selectionController.getSelectedMetaInformation().getTitle()
             ).execute();
         }
+    }    
+
+    private void addNewGameToModel() {
+        AddGameView view = new AddGameView(_view);
+        AddGameModel model = new AddGameModel();
+        AddGameController controller = new AddGameController(view, model);
+            view.setVisible(true);
+            
+        if ( controller.wasOk() ) {
+            _model.addNewGame(model.getGame());
+        }
     }
     
-    private class GameListListener implements ActionListener, TableModelListener {
+    private void removeGamesFromModel() {
+        //Store game ids in order to keep them once they are delete (positions will be change)
+        String[] ids = new String[_view.getSelectedModelRows().length];
+        
+        int pos = 0 ;
+        for ( int row : _view.getSelectedModelRows() ) {
+            ids[pos] = (String) _model.getValueAt(row, GameListModel.ID_NUM_COLUMN);
+            ++pos;
+        }
+        
+        for (String id : ids) {
+            _model.removeGameById(id);
+        }
+    }
+    
+    private void openGameForView() {
+        ShowGameView view;
+            view = new ShowGameView(
+                _view,
+                _model.findGameById((String) _model.getValueAt(_view.getSelectedModelRows()[0], GameListModel.ID_NUM_COLUMN))
+            );
+            view.setVisible(true);
+    }
+    
+    private class GameListListener implements ActionListener {
         
         public void actionPerformed(ActionEvent ae) {
             String resultMessage = null;
@@ -157,47 +185,50 @@ public class GameListController {
                     addNewGameToModel();
                     resultMessage = msgBundle.getString("GAME_ADDED");
                 }
-                _view.setMessageStatus(resultMessage);
+                else if ( command.equals(lblBundle.getString("REMOVE_GAME"))) {
+                    if ( _view.getSelectedModelRows().length > 0 ) {
+                        if (JOptionPane.showConfirmDialog(
+                            _view,
+                            msgBundle.getString("CONFIRM_REMOVE_GAMES"),
+                            msgBundle.getString("ALERT_DIALOG_TITLE"),
+                            JOptionPane.OK_CANCEL_OPTION
+                        ) == JOptionPane.OK_OPTION){
+                        removeGamesFromModel();
+                        resultMessage = msgBundle.getString("GAME_REMOVED");
+                        }
+                        else
+                            resultMessage = msgBundle.getString("OPERATION_CANCELLED");
+                    }
+                    else
+                        resultMessage = msgBundle.getString("SELECT_AT_LEAST_ONE_GAME");                    
+                }
+                else if ( command.equals(lblBundle.getString("VIEW_GAME"))) {
+                    if ( _view.getSelectedModelRows().length == 1 ) {
+                        openGameForView();
+                    }
+                    else
+                        resultMessage = msgBundle.getString("SELECT_JUST_ONE_GAME");                    
+                }
+                _view.setStatusBarMessage(resultMessage);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(_view, ex.getMessage());
             }
-        }
-
-        public void tableChanged(TableModelEvent tme) {
-            Game theGame = _model.findGameById((String) _model.getValueAt(tme.getLastRow(), 0)) ;
-                switch ( tme.getColumn() ) {
-                    case GameListModel.TITLE_NUM_COLUMN:
-                        theGame.setTitle((String) _model.getValueAt(tme.getLastRow(), tme.getColumn()));
-                        break ;
-                    case GameListModel.GENRE_NUM_COLUMN:
-                        theGame.setGenre((String) _model.getValueAt(tme.getLastRow(), tme.getColumn()));
-                        break ;
-                    case GameListModel.COMPLETED_NUM_COLUMN:
-                        theGame.setCompleted((Boolean) _model.getValueAt(tme.getLastRow(), tme.getColumn()));
-                        break ;
-                    default:                       
-                } 
         }        
-
-        private void addNewGameToModel() {
-            //TODO: Crear dialog de introducción de info
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
     }
     
     public class LoadMetacriticInfoWorker extends SwingWorker<Void, Integer> {
-        private final List<String> _gameIds;
+        private final int[] _gamePositions;
         
-        public LoadMetacriticInfoWorker(List<String> gameIds){
-            this._gameIds = gameIds;
+        public LoadMetacriticInfoWorker(int[] gamePositions){
+            this._gamePositions = gamePositions;
         }
 
         @Override
         protected Void doInBackground() {
             int count = 0 ;
             
-            for ( String gameId : _gameIds ) {
-                if ( _model.updateGameWithMetaInfoAuto(gameId) ) {
+            for ( int gamePosition : _gamePositions ) {
+                if ( _model.updateGameWithMetaInfoAuto(gamePosition) ) {
                     ++count;
                     publish(count);
                 }
@@ -208,12 +239,12 @@ public class GameListController {
         
          @Override
         protected void process(List<Integer> chunks) {
-            _view.setMessageStatus(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADING"), chunks.get(0), _gameIds.size()));
+            _view.setStatusBarMessage(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADING"), chunks.get(0), _gamePositions.length));
         }
         
         @Override
         protected void done(){
-            _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
+            _view.setStatusBarMessage(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
         }        
     }
     
@@ -234,30 +265,30 @@ public class GameListController {
         
         @Override
         protected void done(){
-            _view.setMessageStatus(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("STEAM_LOADED"), _loadedGamesCount));
+            _view.setStatusBarMessage(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("STEAM_LOADED"), _loadedGamesCount));
         }        
     }
     
     public class UpdateGameWithMetaInformationWorker extends SwingWorker<Void,Void> {
-        private final String _gameId;
+        private final int _pos;
         private final String _title;
         
-        public UpdateGameWithMetaInformationWorker(String gameId, String title) {
-            this._gameId = gameId;
+        public UpdateGameWithMetaInformationWorker(int pos, String title) {
+            this._pos = pos;
             this._title = title;
         }
         
         @Override
         protected Void doInBackground() throws Exception {
-            _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_EXECUTED"));
-            _model.updateGameWithMetaInfoManual(_gameId, _title);
+            _view.setStatusBarMessage(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_EXECUTED"));
+            _model.updateGameWithMetaInfoManual(_pos, _title);
             
             return ( null );
         }
 
         @Override
         protected void done() {
-            _view.setMessageStatus(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
+            _view.setStatusBarMessage(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED"));
         }        
     }
 }

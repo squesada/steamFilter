@@ -38,7 +38,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.lajuderia.beans.AbstractPlatformGame;
-import org.lajuderia.beans.AbstractPlatformGame.Platform;
+import org.lajuderia.beans.AbstractPlatformGame.PlatformGame;
 import org.lajuderia.beans.Game;
 import org.lajuderia.beans.PlatformGameFactory;
 import org.w3c.dom.Document;
@@ -113,7 +113,7 @@ public class Xml {
             
             if ( nodeMap.getNamedItem("platform") != null ) {
                 AbstractPlatformGame associatedGame;
-                    associatedGame = PlatformGameFactory.create(Platform.valueOf(nodeMap.getNamedItem("platform").getNodeValue()));
+                    associatedGame = PlatformGameFactory.create(PlatformGame.valueOf(nodeMap.getNamedItem("platform").getNodeValue()));
                     associatedGame.setId(Integer.parseInt(nodeMap.getNamedItem("platformid").getNodeValue()));
                     associatedGame.setName(nodeMap.getNamedItem("platformname").getNodeValue());
                     

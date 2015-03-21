@@ -119,8 +119,10 @@ public class SteamAPI {
                     if ( response.getBody().getObject().has("results") )
                         similarGames = response.getBody().getObject().getJSONArray("results");
             } catch(UnirestException uex){
-            } catch(JSONException jex){
+                //TODO: Controlar si no hay conexión a Internet
+            } catch(JSONException jex){                
             }
+            
             return ( similarGames ) ;
     }
 }

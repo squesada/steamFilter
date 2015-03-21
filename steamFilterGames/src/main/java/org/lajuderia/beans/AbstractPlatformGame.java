@@ -30,13 +30,13 @@ package org.lajuderia.beans;
 public abstract class AbstractPlatformGame {
     private int _id;
     private String _name;
-    protected Platform _platform ;
+    protected PlatformGame _platform ;
     
-    protected AbstractPlatformGame(Platform platform){
+    protected AbstractPlatformGame(PlatformGame platform){
         this._platform = platform;
     }
     
-    protected AbstractPlatformGame(int id, String name, Platform platform){
+    protected AbstractPlatformGame(int id, String name, PlatformGame platform){
         this._id = id;
         this._name = name;
         this._platform = platform;
@@ -58,7 +58,7 @@ public abstract class AbstractPlatformGame {
         this._name = name;
     }
     
-    public Platform getPlatform(){
+    public PlatformGame getPlatform(){
         return (_platform);
     }
     
@@ -81,18 +81,30 @@ public abstract class AbstractPlatformGame {
         hash = 97 * hash + (this._platform != null ? this._platform.hashCode() : 0);
         return hash;
     }
-    public enum Platform{
-        STEAM('S', "Steam") , ORIGIN('O', "Origin") , DESURA('D', "Desura") , UPLAY('U', "Uplay") , GOG('G', "GOG"), DEFAULT_PLATFORM('?',"Default");
-        private char _prefix;
-        private String _name;
+    
+    public enum PlatformGame{
+        STEAM('S', "Steam") ,
+        ORIGIN('O', "Origin") ,
+        DESURA('D', "Desura") ,
+        UPLAY('U', "UPlay") ,
+        GOG('G', "GOG"),
+        DEFAULT_PLATFORM('?',java.util.ResourceBundle.getBundle("TextsBundle").getString("DEFAULT_PLATFORM"));
         
-        private Platform(char prefix, String value){
+        private final char _prefix;
+        private final String _name;
+        
+        private PlatformGame(char prefix, String value){
             this._prefix = prefix;
             this._name = value;
         }
         
         public char getPrefix(){
             return(_prefix);
-        }        
+        }
+        
+        @Override
+        public String toString(){
+            return ( _name );
+        }
     }
 }

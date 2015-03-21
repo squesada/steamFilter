@@ -21,24 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.lajuderia.beans;
+package org.lajuderia.models;
 
-import org.lajuderia.beans.AbstractPlatformGame.PlatformGame;
+import org.lajuderia.beans.Game;
 
 /**
  *
  * @author Sergio
  */
-public abstract class PlatformGameFactory {
-    public static AbstractPlatformGame create(PlatformGame platform){
-        //TODO: Rellenar con los tipos de plataforma
-        AbstractPlatformGame abstractGame = null ;
-        
-        if ( platform.equals(PlatformGame.STEAM))
-            abstractGame = new SteamGame();
-        else
-            abstractGame = new DefaultPlatformGame();
-        
-        return ( abstractGame );
+public class AddGameModel {
+    Game _newGame;
+    
+    public AddGameModel(){
+        this._newGame = new Game();
+    }
+    
+    public Game getGame() {
+        return ( this._newGame );
+    }
+
+    public void clearGame() {
+        this._newGame = null;
     }
 }
