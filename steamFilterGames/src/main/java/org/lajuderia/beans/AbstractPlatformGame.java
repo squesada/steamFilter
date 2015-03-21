@@ -102,8 +102,7 @@ public abstract class AbstractPlatformGame {
             return(_prefix);
         }
         
-        @Override
-        public String toString(){
+        public String toPrettyString(){
             return ( _name );
         }
     }
