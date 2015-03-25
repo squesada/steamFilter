@@ -32,6 +32,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionListener;
 
 /**
@@ -98,8 +99,8 @@ public class GameSelectionView extends JDialog{
         this.btCancel.addActionListener(listener);
     }
     
-    public void registerKeyListener(KeyListener listener) {
-        this.txtTitle.addKeyListener(listener);
+    public void registerDocumentListener(DocumentListener listener) {
+        this.txtTitle.getDocument().addDocumentListener(listener);
     }
     
     public void registerListSelectionListener(ListSelectionListener listener) {

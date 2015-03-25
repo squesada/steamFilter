@@ -25,11 +25,13 @@
 package org.lajuderia.models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.lajuderia.communication.Xml;
 import org.lajuderia.beans.SteamGame;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.TreeSet;
 import javax.swing.table.AbstractTableModel;
 import org.lajuderia.beans.AbstractPlatformGame;
 import org.lajuderia.beans.Game;
@@ -47,7 +49,8 @@ public class GameListModel extends AbstractTableModel {
     public static final int GENRE_NUM_COLUMN = 2 ;
     public static final int METASCORE_NUM_COLUMN = 3 ;
     public static final int USERSCORE_NUM_COLUMN = 4 ;
-    public static final int COMPLETED_NUM_COLUMN = 5 ;
+    public static final int MEANSCORE_NUM_COLUMN = 5 ;
+    public static final int COMPLETED_NUM_COLUMN = 6 ;
     private final ResourceBundle textBundle =
             java.util.ResourceBundle.getBundle("TextsBundle");
 
@@ -57,6 +60,7 @@ public class GameListModel extends AbstractTableModel {
         textBundle.getString("GAME_GENRE"),
         textBundle.getString("GAME_METASCORE"),
         textBundle.getString("GAME_USERSCORE"),
+        textBundle.getString("GAME_MEANSCORE"),
         textBundle.getString("GAME_COMPLETED")
     };
 
@@ -114,17 +118,17 @@ public class GameListModel extends AbstractTableModel {
             return ( newGameList );
     }
     
-    public boolean updateGameWithMetaInfoAuto(int position) {
-        boolean result = updateGameWithMetaInfoManual(position, null);
+    public boolean updateGameWithMetaInfoAuto(String id) {
+        boolean result = updateGameWithMetaInfoManual(id, null);
         if ( result )
             fireTableDataChanged();
         
         return ( result );
     }
     
-    public boolean updateGameWithMetaInfoManual(int position, String title) {
+    public boolean updateGameWithMetaInfoManual(String id, String title) {
         boolean gameChanged = false ;
-        Game theGame = _gameList.get(position);
+        Game theGame = _gameList.findGameById(id);
         
         if ( theGame != null ) {
             MetaInformation metaInformation = MetaInformationDAO.getMetaInfoByTitle(title != null ? title : theGame.getTitle());
@@ -140,7 +144,7 @@ public class GameListModel extends AbstractTableModel {
             fireTableDataChanged();
         
         return ( gameChanged ) ;
-    }
+    }    
     
     @Override
     public Class getColumnClass(int columnIndex) {
@@ -148,8 +152,9 @@ public class GameListModel extends AbstractTableModel {
 
         if ( columnIndex == COMPLETED_NUM_COLUMN )
             columnClass = java.lang.Boolean.class;
-        else if ( ( columnIndex == METASCORE_NUM_COLUMN )
-                || ( columnIndex == USERSCORE_NUM_COLUMN )
+        else if ( (columnIndex == METASCORE_NUM_COLUMN)
+                || (columnIndex == USERSCORE_NUM_COLUMN)
+                || (columnIndex == MEANSCORE_NUM_COLUMN)
                 )
             columnClass = java.lang.Integer.class;
         else
@@ -201,12 +206,29 @@ public class GameListModel extends AbstractTableModel {
                 if ( _gameList.get(row).hasMetaInformation() )
                     result = _gameList.get(row).getMetaInformation().getUserscore();
                 break;
+            case MEANSCORE_NUM_COLUMN:
+                if ( _gameList.get(row).hasMetaInformation() )
+                    result = (_gameList.get(row).getMetaInformation().getMetascore()
+                            + _gameList.get(row).getMetaInformation().getUserscore()) /2 ;
+                break;
             case COMPLETED_NUM_COLUMN:
                 result = _gameList.get(row).isCompleted();
                 break;
         }
         
         return ( result );
+    }
+    
+    public String[] getGenres() {        
+        TreeSet<String> treeGenres = new TreeSet<String>();
+            if ( _gameList.size() > 0 ) {
+                Iterator<Game> it = _gameList.iterator() ;
+                while ( it.hasNext() ) {
+                    treeGenres.add(it.next().getGenre());
+                }
+        }
+                
+        return ( Arrays.copyOf(treeGenres.toArray(), treeGenres.size(), String[].class));
     }
 
     @Override
@@ -264,31 +286,6 @@ public class GameListModel extends AbstractTableModel {
         
         public int findGamePositionById(String id) {            
             return ( getGamePositionByIdAux(id, 0, this.size()-1 ));
-        }
-        
-        private int getGamePositionByIdAux2(String id, int numFrom, int numTo) {
-            int position = -1;
-            
-            if ( numFrom <= numTo ) {
-                switch(numTo-numFrom) {
-                    case 1:
-                        if ( this.get(numTo).getId().equals(id) )
-                            position = numTo;
-                        else if ( this.get(numFrom).getId().equals(id) )
-                            position = numFrom;
-                        break;
-                    case 0:
-                        if ( this.get(numTo).getId().equals(id) )
-                            position = numTo;
-                        break;
-                    default:
-                        position = getGamePositionByIdAux(id, numFrom, (numFrom+numTo)/2);
-                        if ( position == -1 )
-                            position = getGamePositionByIdAux(id, (numFrom+numTo)/2+1, numTo);
-                }
-            }
-            
-            return ( position );
         }
         
         private int getGamePositionByIdAux(String id, int numFrom, int numTo) {

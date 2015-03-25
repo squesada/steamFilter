@@ -30,6 +30,8 @@ import java.awt.event.KeyListener;
 import java.util.ResourceBundle;
 import javax.swing.JList;
 import javax.swing.SwingWorker;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import org.lajuderia.beans.MetaInformation;
@@ -53,7 +55,7 @@ public class GameSelectionController {
         this._view = view;        
         
         _view.registerActionListener(_listener);
-        _view.registerKeyListener(_listener);
+        _view.registerDocumentListener(_listener);
         _view.registerListSelectionListener(_listener);
         _view.setListModel(_model);
             
@@ -100,7 +102,7 @@ public class GameSelectionController {
         }
     }
 
-    private class GameSelectionListener implements ActionListener, KeyListener, ListSelectionListener{
+    private class GameSelectionListener implements ActionListener, DocumentListener, ListSelectionListener{
         
         private final ResourceBundle lblBundle = java.util.ResourceBundle.getBundle("LabelsBundle");
         private final ResourceBundle msgBundle = java.util.ResourceBundle.getBundle("MessagesBundle");
@@ -119,19 +121,6 @@ public class GameSelectionController {
             _view.dispose();
         }
 
-        public void keyTyped(KeyEvent ke) {
-            //Do nothing
-        }
-
-        public void keyPressed(KeyEvent ke) {
-            //Do nothing
-        }
-
-        public void keyReleased(KeyEvent ke) {
-            updateGameList();
-            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
-        }        
-
         public void valueChanged(ListSelectionEvent lse) {
             if ( ((JList) lse.getSource()).getSelectedIndex() != -1 ) {
                 _selectedItem = (MetaInformation) ((JList) lse.getSource()).getSelectedValue();
@@ -141,6 +130,21 @@ public class GameSelectionController {
             else {
                 _view.setAllowToAccept(false);
             }            
+        }
+
+        public void insertUpdate(DocumentEvent de) {
+            updateGameList();
+            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
+        }
+
+        public void removeUpdate(DocumentEvent de) {
+            updateGameList();
+            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
+        }
+
+        public void changedUpdate(DocumentEvent de) {
+            updateGameList();
+            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
         }
     }
     
