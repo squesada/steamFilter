@@ -31,6 +31,7 @@ import java.util.Collection;
 import org.lajuderia.beans.MetaInformation;
 import java.util.Iterator;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
@@ -55,19 +56,19 @@ import org.xml.sax.SAXException;
  * @author Sergio
  */
 public class Xml {
-    private final static String TAG = "communication.Xml";
+    public final static String TAG = "communication.Xml";
     
     /**
      * Loads the xml which contains the game list previously saved from disk
      * @return List of games
      * @throws org.lajuderia.exceptions.CustomException
      */
-    public static List<Game> loadGamesFromDisk() throws CustomException {        
+    public List<Game> loadGamesFromDisk() throws CustomException {        
         List<Game> gameList = new ArrayList<Game>();
         
         Document doc = null ;
             try {
-                doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new java.io.File("steamgames.xml"));
+                doc = getNewDocumentBuilder().parse(new java.io.File("steamgames.xml"));
             } catch ( IOException ex ) {
                 throw (new CustomException(TAG, ex));
             } catch ( ParserConfigurationException ex ) {
@@ -90,10 +91,10 @@ public class Xml {
      * @param gameList The game list
      * @throws org.lajuderia.exceptions.CustomException 
      */
-    public static void saveGamesToDisk(Collection<Game> gameList) throws CustomException {
+    public void saveGamesToDisk(Collection<Game> gameList) throws CustomException {
         Document xmlGames = null ;
             try {
-                xmlGames = DocumentBuilderFactory.newInstance().newDocumentBuilder().getDOMImplementation().createDocument(null, "steamgames", null);
+                xmlGames = getNewDocumentBuilder().getDOMImplementation().createDocument(null, "steamgames", null);
             } catch (ParserConfigurationException ex) {
                 throw (new CustomException(TAG, ex));
             }
@@ -119,7 +120,11 @@ public class Xml {
                         }
     }
     
-    private static void createElementFromGame(Game game, Element element) {
+    protected DocumentBuilder getNewDocumentBuilder() throws ParserConfigurationException {
+        return ( DocumentBuilderFactory.newInstance().newDocumentBuilder() );
+    }
+    
+    private void createElementFromGame(Game game, Element element) {
         element.setAttribute("title", game.getTitle());
         element.setAttribute("genre", game.getGenre());
         element.setAttribute("completed", Boolean.toString(game.isCompleted()));
@@ -139,7 +144,7 @@ public class Xml {
         }        
     }
 
-    private static Game readGameFromNamedNodeMap(NamedNodeMap nodeMap) {
+    private Game readGameFromNamedNodeMap(NamedNodeMap nodeMap) {
         Game game ;
             game = new Game();
             game.setTitle(nodeMap.getNamedItem("title").getNodeValue());

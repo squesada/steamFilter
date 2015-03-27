@@ -44,7 +44,7 @@ import org.lajuderia.views.GameSelectionView;
 import org.lajuderia.views.ShowGameView;
 
 /**
- *
+ * Controller class for main view
  * @author Sergio
  */
 public class GameListController {
@@ -52,6 +52,11 @@ public class GameListController {
     private final GameListModel _model ;
     GameListListener _listener = new GameListListener();
     
+    /**
+     * Constructor
+     * @param view the view
+     * @param model the model
+     */
     public GameListController(GameListView view, GameListModel model) {
         this._view = view ;
         this._model = model ;
@@ -250,10 +255,16 @@ public class GameListController {
         }
     }
     
+    /**
+     * Worker which loads Metacritic information from a list of games
+     */
     public class LoadMetacriticInfoWorker extends SwingWorker<Boolean, Integer> {
         private final String[] _gameIds;
         
-        
+        /**
+         * Constructor
+         * @param gameIds List of game IDs 
+         */
         public LoadMetacriticInfoWorker(String[] gameIds){
             this._gameIds = gameIds;
         }
@@ -299,10 +310,17 @@ public class GameListController {
         }        
     }
     
+    /**
+     * Worker which loads into model the games a Steam user owns
+     */
     public class LoadSteamGamesWorker extends SwingWorker<Void, Void> {
         private final long _steamId;
         private int _loadedGamesCount;
         
+        /**
+         * Constructor
+         * @param steamId Steam user ID
+         */
         public LoadSteamGamesWorker(Long steamId){
             this._steamId = steamId;
         }
@@ -320,10 +338,18 @@ public class GameListController {
         }        
     }
     
+    /**
+     * Worker which loads Metacritic information from a game
+     */
     public class UpdateGameWithMetaInformationWorker extends SwingWorker<Boolean,Void> {
         private final String _id;
         private final String _title;
         
+        /**
+         * Constructor
+         * @param id Steam game ID
+         * @param title Metacritic game title
+         */
         public UpdateGameWithMetaInformationWorker(String id, String title) {
             this._id = id;
             this._title = title;

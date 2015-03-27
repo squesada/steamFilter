@@ -39,6 +39,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentListener;
 import org.lajuderia.beans.AbstractPlatformGame.PlatformGame;
 
 /**
@@ -46,6 +47,9 @@ import org.lajuderia.beans.AbstractPlatformGame.PlatformGame;
  * @author Sergio
  */
 public class AddGameView extends JDialog {
+    public static String TITLE_MODEL_FIELD = "TITLE";
+    public static String GENRE_MODEL_FIELD = "GENRE";
+    
     private JTextField _txtTitle;
     private JTextField _txtGenre;
     private JComboBox<PlatformGame> _cbPlatform; 
@@ -141,9 +145,11 @@ public class AddGameView extends JDialog {
         _btCancel.addActionListener((ActionListener) listener);
     }
     
-    public void registerKeyListener(KeyListener listener){
-        _txtTitle.addKeyListener(listener);
-        _txtGenre.addKeyListener(listener);
+    public void registerDocumentListener(DocumentListener listener){
+        _txtTitle.getDocument().putProperty("field", TITLE_MODEL_FIELD);
+        _txtTitle.getDocument().addDocumentListener(listener);
+        _txtGenre.getDocument().putProperty("field", GENRE_MODEL_FIELD);
+        _txtGenre.getDocument().addDocumentListener(listener);
     }
     
     public void registerItemListener(ItemListener listener){

@@ -31,37 +31,55 @@ import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import org.lajuderia.beans.AbstractPlatformGame;
 import org.lajuderia.beans.PlatformGameFactory;
 import org.lajuderia.models.AddGameModel;
 import org.lajuderia.views.AddGameView;
 
 /**
- *
+ * Controller class to add a game
  * @author Sergio
  */
 public class AddGameController {
-    private AddGameView _view;
-    private AddGameModel _model;
+    private final AddGameView _view;
+    private final AddGameModel _model;
     private boolean _wasOk = false;
     
+    /**
+     * Constructor
+     * @param view the related view
+     * @param model the related model
+     */
     public AddGameController(AddGameView view, AddGameModel model) {
         this._view = view;
         this._model = model;
         
         AddGameListener listener = new AddGameListener();
             this._view.registerActionListener(listener);
-            this._view.registerKeyListener(listener);
+            this._view.registerDocumentListener(listener);
             this._view.registerItemListener(listener);
     }
     
+    /**
+     * Gets true if the view was closed by pressing OK button
+     * @return Boolean
+     */
     public boolean wasOk() {
         return ( _wasOk );
     }
     
-    private class AddGameListener implements ActionListener, KeyListener, ItemListener {
+    /**
+     * Listener class to add a game
+     */
+    private class AddGameListener implements ActionListener, DocumentListener, ItemListener {
 
         public void actionPerformed(ActionEvent ae) {
             ResourceBundle lblBundle =
@@ -107,5 +125,35 @@ public class AddGameController {
                 _model.getGame().setCompleted(((JCheckBox) ie.getItem()).isSelected() );
             }
         }   
+
+        public void insertUpdate(DocumentEvent de) {
+            updateModel(de);
+        }
+
+        public void removeUpdate(DocumentEvent de) {
+            updateModel(de);
+        }
+
+        public void changedUpdate(DocumentEvent de) {
+            updateModel(de);
+        }
+
+        private void updateModel(DocumentEvent e) {
+            Document doc;
+                doc = e.getDocument();
+                
+            String text = null ;
+            try {
+                text = doc.getText(0, doc.getLength());
+            } catch (BadLocationException ex) {
+            }
+                
+            if ( doc.getProperty("field").equals(AddGameView.TITLE_MODEL_FIELD) ) {
+                _model.getGame().setTitle(text);
+            }
+            else if ( doc.getProperty("field").equals(AddGameView.GENRE_MODEL_FIELD) ) {
+                _model.getGame().setGenre(text);
+            }
+        }
     }
 }
