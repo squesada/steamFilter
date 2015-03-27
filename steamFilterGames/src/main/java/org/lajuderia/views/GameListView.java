@@ -40,7 +40,6 @@ import javax.swing.JTable;
 import javax.swing.RowSorter;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import org.lajuderia.components.JCheckBoxList;
 
 /**
@@ -161,7 +160,9 @@ public class GameListView extends JFrame {
 
     public void updateGenreCheckBoxList(String[] genres) {
         //TODO: Controlar que cuando se actualice, también se registre el listener
-        DefaultListModel<JCheckBox> genreModel = new DefaultListModel<JCheckBox>();
+        DefaultListModel<JCheckBox> genreModel = new DefaultListModel<JCheckBox>(){
+            
+        };
          
         for ( String genre : genres ) {
             genreModel.addElement(new JCheckBox(genre));

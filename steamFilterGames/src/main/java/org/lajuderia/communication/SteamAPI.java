@@ -47,6 +47,11 @@ public class SteamAPI {
     private static final String STEAM_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("STEAM_DEV_KEY");
     private static final String METACRITIC_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("METACRITIC_DEV_KEY");
 
+    /**
+     * Gets the Metacritic information related to the game
+     * @param gameTitle The title game
+     * @return JSONObject
+     */
     public static JSONObject getMetacriticInfo(String gameTitle) {
         JSONObject gameInfo = null;
         HttpResponse<JsonNode> response;
@@ -68,6 +73,12 @@ public class SteamAPI {
             return ( gameInfo ) ;
     }
     
+    /**
+     * Gets the game list the user has in his account
+     * @param userId The Steam user identifier
+     * @return JSONObject
+     * @throws IOException 
+     */
     public static JSONObject getUserOwnedGames(long userId) throws IOException{
         String url;
         url = new StringBuilder()
@@ -102,6 +113,11 @@ public class SteamAPI {
       }
     }
 
+    /**
+     * Gets the game list with similar title from Metacritic
+     * @param metaTitle The title game
+     * @return JSONArray
+     */
     public static JSONArray getSimilarMetacriticGames(String metaTitle) {
         JSONArray similarGames = null;
         HttpResponse<JsonNode> response;

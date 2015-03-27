@@ -34,7 +34,6 @@ import javax.swing.RowFilter;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.lajuderia.models.AddGameModel;
 import org.lajuderia.models.GameListModel;
@@ -228,6 +227,7 @@ public class GameListController {
                 }
                 else if ( command.equals(lblBundle.getString("REFRESH")) ) {
                     _view.updateGenreCheckBoxList(_model.getGenres());
+                    resultMessage = msgBundle.getString("GENRES_REFRESHED"); 
                 }
                 _view.setStatusBarMessage(resultMessage);
             } catch (Exception ex) {

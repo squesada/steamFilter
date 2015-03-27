@@ -25,15 +25,18 @@
 package org.lajuderia.communication;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.lajuderia.beans.MetaInformation;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -41,20 +44,37 @@ import org.lajuderia.beans.AbstractPlatformGame;
 import org.lajuderia.beans.AbstractPlatformGame.PlatformGame;
 import org.lajuderia.beans.Game;
 import org.lajuderia.beans.PlatformGameFactory;
+import org.lajuderia.exceptions.CustomException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.SAXException;
 
 /**
- *
+ * 
  * @author Sergio
  */
 public class Xml {
-    public static List<Game> loadGamesFromDisk() throws Exception {        
+    private final static String TAG = "communication.Xml";
+    
+    /**
+     * Loads the xml which contains the game list previously saved from disk
+     * @return List of games
+     * @throws org.lajuderia.exceptions.CustomException
+     */
+    public static List<Game> loadGamesFromDisk() throws CustomException {        
         List<Game> gameList = new ArrayList<Game>();
         
-        Document doc ;
-            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new java.io.File("steamgames.xml"));
+        Document doc = null ;
+            try {
+                doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new java.io.File("steamgames.xml"));
+            } catch ( IOException ex ) {
+                throw (new CustomException(TAG, ex));
+            } catch ( ParserConfigurationException ex ) {
+                throw (new CustomException(TAG, ex));
+            } catch ( SAXException ex ) {
+                throw (new CustomException(TAG, ex));
+            }
             
             for ( int i = 0 ; i < doc.getDocumentElement().getChildNodes().getLength() ; i++){
                  Game game;
@@ -65,8 +85,18 @@ public class Xml {
             return ( gameList ) ;
     }
 
-    public static void saveGamesToDisk(Collection<Game> gameList) throws Exception {
-        Document xmlGames = DocumentBuilderFactory.newInstance().newDocumentBuilder().getDOMImplementation().createDocument(null, "steamgames", null);
+    /**
+     * Saves the game list to disk (xml format)
+     * @param gameList The game list
+     * @throws org.lajuderia.exceptions.CustomException 
+     */
+    public static void saveGamesToDisk(Collection<Game> gameList) throws CustomException {
+        Document xmlGames = null ;
+            try {
+                xmlGames = DocumentBuilderFactory.newInstance().newDocumentBuilder().getDOMImplementation().createDocument(null, "steamgames", null);
+            } catch (ParserConfigurationException ex) {
+                throw (new CustomException(TAG, ex));
+            }
             xmlGames.setXmlVersion("1.0");
             Element root = xmlGames.getDocumentElement();
             
@@ -79,9 +109,14 @@ public class Xml {
             }
             
             Source source = new DOMSource(xmlGames);
-                Result result = new StreamResult(new java.io.File("steamgames.xml")); //nombre del archivo
-                    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                        transformer.transform(source, result);
+                Result result = new StreamResult(new java.io.File("steamgames.xml"));
+                    Transformer transformer;
+                        try {
+                            transformer = TransformerFactory.newInstance().newTransformer();
+                            transformer.transform(source, result);
+                        } catch ( TransformerException ex ) {
+                            throw (new CustomException(TAG, ex));
+                        }
     }
     
     private static void createElementFromGame(Game game, Element element) {

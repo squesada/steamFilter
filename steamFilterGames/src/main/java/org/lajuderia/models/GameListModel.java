@@ -185,6 +185,12 @@ public class GameListModel extends AbstractTableModel {
         return ( COLUMN_TITLES[i] );
     }    
     
+    /**
+     * Gets the value from the table model
+     * @param row Model row number
+     * @param col Model column number
+     * @return Object
+     */
     public Object getValueAt(int row, int col ){
         Object result = null ;
         
@@ -207,9 +213,14 @@ public class GameListModel extends AbstractTableModel {
                     result = _gameList.get(row).getMetaInformation().getUserscore();
                 break;
             case MEANSCORE_NUM_COLUMN:
-                if ( _gameList.get(row).hasMetaInformation() )
-                    result = (_gameList.get(row).getMetaInformation().getMetascore()
-                            + _gameList.get(row).getMetaInformation().getUserscore()) /2 ;
+                if ( _gameList.get(row).hasMetaInformation() ) {
+                    result = _gameList.get(row).getMetaInformation().getMetascore() == 0
+                            ? _gameList.get(row).getMetaInformation().getUserscore()
+                            : (_gameList.get(row).getMetaInformation().getUserscore() == 0
+                                ? _gameList.get(row).getMetaInformation().getMetascore()
+                                : (_gameList.get(row).getMetaInformation().getMetascore()
+                                    + _gameList.get(row).getMetaInformation().getUserscore()) /2);
+                }
                 break;
             case COMPLETED_NUM_COLUMN:
                 result = _gameList.get(row).isCompleted();

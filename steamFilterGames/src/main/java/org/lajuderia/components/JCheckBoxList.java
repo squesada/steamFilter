@@ -46,6 +46,7 @@ public class JCheckBoxList extends JList<JCheckBox> {
         if (index != -1) {
           JCheckBox checkbox = (JCheckBox) getModel().getElementAt(index);
           checkbox.setSelected(!checkbox.isSelected());
+          fireSelectionValueChanged(index, index, true);
           repaint();
         }
       }
