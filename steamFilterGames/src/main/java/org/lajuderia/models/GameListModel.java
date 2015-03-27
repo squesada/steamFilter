@@ -69,7 +69,7 @@ public class GameListModel extends AbstractTableModel {
     public void loadGamesFromDisk() throws Exception {        
         boolean hasChanged = false;
         
-        for ( Game game : Xml.loadGamesFromDisk() ) {
+        for ( Game game : new Xml().loadGamesFromDisk() ) {
             if ( _gameList.findGameById(game.getId()) == null ) {
                 _gameList.add(game);
                 hasChanged = true;
@@ -92,7 +92,7 @@ public class GameListModel extends AbstractTableModel {
     }
 
     public void saveGamesToDisk() throws Exception {
-        Xml.saveGamesToDisk(_gameList);
+        new Xml().saveGamesToDisk(_gameList);
     }
     
     public List<Game> getUpdatedGameListFromSteam(long userId) {
