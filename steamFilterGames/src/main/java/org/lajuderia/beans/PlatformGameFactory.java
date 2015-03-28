@@ -36,6 +36,14 @@ public abstract class PlatformGameFactory {
         
         if ( platform.equals(PlatformGame.STEAM))
             abstractGame = new SteamGame();
+        else if ( platform.equals(PlatformGame.DESURA))
+            abstractGame = new DesuraGame();
+        else if ( platform.equals(PlatformGame.GOG))
+            abstractGame = new GOGGame();
+        else if ( platform.equals(PlatformGame.ORIGIN))
+            abstractGame = new OriginGame();
+        else if ( platform.equals(PlatformGame.UPLAY))
+            abstractGame = new UPlayGame();
         else
             abstractGame = new DefaultPlatformGame();
         
