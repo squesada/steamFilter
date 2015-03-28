@@ -29,16 +29,19 @@ import org.lajuderia.beans.SteamGame;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.lajuderia.beans.MetaInformation;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
+ * Data Access Object related to Steam games
  * @author Sergio
  */
 public class SteamGameDAO {
+    
+    /**
+     * Gets the game list the user has in his account
+     * @param userId
+     * @return 
+     */
     public static List<SteamGame> getUserOwnedGames(long userId) {
         List<SteamGame> gameList = new ArrayList<SteamGame>();
         JSONObject jsonGames = null ;
@@ -46,6 +49,7 @@ public class SteamGameDAO {
                 jsonGames = SteamAPI.getUserOwnedGames(userId);
             }
             catch(IOException iex){
+                //TODO: Manage exception
             }
             if ( jsonGames != null ) {
                 for ( int i = 0 ; i < jsonGames.getJSONObject("response").getJSONArray("games").length() ; i++)

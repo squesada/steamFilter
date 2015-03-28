@@ -44,7 +44,7 @@ import org.lajuderia.views.GameSelectionView;
 import org.lajuderia.views.ShowGameView;
 
 /**
- * Controller class for main view
+ * Controller class from main view
  * @author Sergio
  */
 public class GameListController {

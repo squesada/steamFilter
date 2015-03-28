@@ -29,10 +29,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
@@ -45,7 +42,7 @@ import org.lajuderia.models.AddGameModel;
 import org.lajuderia.views.AddGameView;
 
 /**
- * Controller class to add a game
+ * Controller class from add game functionality
  * @author Sergio
  */
 public class AddGameController {

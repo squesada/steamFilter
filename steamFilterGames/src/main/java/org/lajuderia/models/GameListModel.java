@@ -40,7 +40,7 @@ import org.lajuderia.daos.MetaInformationDAO;
 import org.lajuderia.daos.SteamGameDAO;
 
 /**
- *
+ * Model class related to the main view
  * @author Sergio
  */
 public class GameListModel extends AbstractTableModel {
@@ -66,6 +66,10 @@ public class GameListModel extends AbstractTableModel {
 
     private final ArrayListGame _gameList = new ArrayListGame();
     
+    /**
+     * Updates the model with the cache information stored in the hdd
+     * @throws Exception 
+     */
     public void loadGamesFromDisk() throws Exception {        
         boolean hasChanged = false;
         
@@ -80,21 +84,36 @@ public class GameListModel extends AbstractTableModel {
             fireTableDataChanged();
     }
     
+    /**
+     * Searchs a game from the model
+     * @param id game ID
+     * @return Game
+     */
     public Game findGameById(String id){
         return ( _gameList.findGameById(id) ) ;
     }
 
     /**
-     * @return the _gamesMap
+     * Returns the game iterator
+     * @return Iterator of Game
      */
     public Iterator<Game> getGamesIterator() {
         return _gameList.iterator();
     }
 
+    /**
+     * Saves the model to hdd
+     * @throws Exception 
+     */
     public void saveGamesToDisk() throws Exception {
         new Xml().saveGamesToDisk(_gameList);
     }
     
+    /**
+     * Updates the model with the Steam user library information
+     * @param userId Steam user identifier
+     * @return List of Game
+     */
     public List<Game> getUpdatedGameListFromSteam(long userId) {
         //TODO: Verificar que el usuario existe y tiene el perfil público
         
@@ -118,6 +137,11 @@ public class GameListModel extends AbstractTableModel {
             return ( newGameList );
     }
     
+    /**
+     * Updates a game with the Metacritic information
+     * @param id Game ID
+     * @return Boolean (true when the game has been update)
+     */
     public boolean updateGameWithMetaInfoAuto(String id) {
         boolean result = updateGameWithMetaInfoManual(id, null);
         if ( result )
@@ -126,12 +150,18 @@ public class GameListModel extends AbstractTableModel {
         return ( result );
     }
     
+    /**
+     * Updates a game with the Metacritic information related to a game
+     * @param id Game ID
+     * @param title Game title to search
+     * @return Boolean (true when the game has been updated)
+     */
     public boolean updateGameWithMetaInfoManual(String id, String title) {
         boolean gameChanged = false ;
         Game theGame = _gameList.findGameById(id);
         
         if ( theGame != null ) {
-            MetaInformation metaInformation = MetaInformationDAO.getMetaInfoByTitle(title != null ? title : theGame.getTitle());
+            MetaInformation metaInformation = MetaInformationDAO.findMetaInfoByTitle(title != null ? title : theGame.getTitle());
                 
             if ( metaInformation != null && (!theGame.hasMetaInformation() || !metaInformation.equals(theGame.getMetaInformation())) ) {
                 theGame.setMetaInformation(metaInformation);
@@ -230,6 +260,10 @@ public class GameListModel extends AbstractTableModel {
         return ( result );
     }
     
+    /**
+     * Gets the genres list
+     * @return String[]
+     */
     public String[] getGenres() {        
         TreeSet<String> treeGenres = new TreeSet<String>();
             if ( _gameList.size() > 0 ) {
@@ -258,6 +292,10 @@ public class GameListModel extends AbstractTableModel {
         }
     }
 
+    /**
+     * Adds a game to model
+     * @param game Game to add
+     */
     public void addNewGame(Game game) {
         game.getAssociatedGame().setId(searchMaxId(game.getAssociatedGame().getPlatform()) + 1);
         _gameList.add(game);
@@ -278,12 +316,19 @@ public class GameListModel extends AbstractTableModel {
         return ( maxId );
     }
 
+    /**
+     * Removes a game from the model
+     * @param id Game ID
+     */
     public void removeGameById(String id) {
         int gamePosition = _gameList.findGamePositionById(id);
         _gameList.remove(gamePosition);
         fireTableDataChanged();
     }
     
+    /**
+     * Subclass from ArrayList<Game> which allows find an element by ID
+     */
     private class ArrayListGame extends ArrayList<Game> {
         public Game findGameById(String id) {
             Game foundGame = null;

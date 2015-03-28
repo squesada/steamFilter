@@ -26,20 +26,30 @@ package org.lajuderia.models;
 import org.lajuderia.beans.Game;
 
 /**
- *
+ * Model class from add a game functionality
  * @author Sergio
  */
 public class AddGameModel {
     Game _newGame;
     
+    /**
+     * Constructor
+     */
     public AddGameModel(){
         this._newGame = new Game();
     }
     
+    /**
+     * Gets the game
+     * @return 
+     */
     public Game getGame() {
         return ( this._newGame );
     }
 
+    /**
+     * Clears the game
+     */
     public void clearGame() {
         this._newGame = null;
     }

@@ -31,10 +31,16 @@ import org.lajuderia.beans.MetaInformation;
 import org.lajuderia.communication.SteamAPI;
 
 /**
- *
+ * Data access object related to Metacritic information
  * @author Sergio
  */
 public class MetaInformationDAO {
+    
+    /**
+     * Gets the list of games which title is similar to another from Metacritic
+     * @param title the game title
+     * @return List of MetaInformation
+     */
     public static List<MetaInformation> getSimilarGamesFromMetacritic(String title){
         List<MetaInformation> metaInformation = new ArrayList<MetaInformation>();
         JSONArray jsonMetacritic;
@@ -67,7 +73,12 @@ public class MetaInformationDAO {
         return ( new MetaInformation(title, summary, genre, metascore, userscore) ) ;
     }
 
-    public static MetaInformation getMetaInfoByTitle(String title) {
+    /**
+     * Gets the Metacritic information related to a game
+     * @param title the game title
+     * @return MetaInformation
+     */
+    public static MetaInformation findMetaInfoByTitle(String title) {
         MetaInformation metaInformation = null;
         JSONObject json;
             json = SteamAPI.getMetacriticInfo(title);

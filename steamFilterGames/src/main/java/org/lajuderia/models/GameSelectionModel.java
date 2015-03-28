@@ -31,12 +31,17 @@ import org.lajuderia.beans.MetaInformation;
 import org.lajuderia.daos.MetaInformationDAO;
 
 /**
- *
+ * Model class related to the game selection functionality
  * @author Sergio
  */
 public class GameSelectionModel extends AbstractListModel {
     private List<MetaInformation> _gameList = new ArrayList<MetaInformation>();
     
+    /**
+     * Updates the model with MetaInformation games with title similar to another
+     * @param title the game title
+     * @return Integer (Number of similar games)
+     */
     public int updateModelWithSimilarMetainfoTo(String title) {
         _gameList = MetaInformationDAO.getSimilarGamesFromMetacritic(title);
         fireContentsChanged(this, 0, _gameList.size()-1);
@@ -44,6 +49,10 @@ public class GameSelectionModel extends AbstractListModel {
         return ( _gameList.size() );
     }
     
+    /**
+     * Gets the MetaInformation iterator
+     * @return Iterator of MetaInformation
+     */
     public Iterator<MetaInformation> getMetaInformationIterator() {
         Iterator it = null ;
             if ( _gameList != null ) {

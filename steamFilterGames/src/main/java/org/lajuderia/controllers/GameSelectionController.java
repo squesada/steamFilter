@@ -37,7 +37,7 @@ import org.lajuderia.models.GameSelectionModel;
 import org.lajuderia.views.GameSelectionView;
 
 /**
- *
+ * Controller class from game selection functionality
  * @author Sergio
  */
 public class GameSelectionController {
@@ -48,6 +48,11 @@ public class GameSelectionController {
     private MetaInformation _selectedItem;
     private boolean _endOk = false;
     
+    /**
+     * Constructor
+     * @param view the view
+     * @param model the model
+     */
     public GameSelectionController(GameSelectionView view, GameSelectionModel model) {
         this._model = model;
         this._view = view;        
@@ -70,10 +75,18 @@ public class GameSelectionController {
         _worker.execute();
     }
     
+    /**
+     * Returns true when the view was closed using the OK button
+     * @return 
+     */
     public boolean wasOk(){
         return ( _endOk );
     }
     
+    /**
+     * Gets the selected game from the view
+     * @return 
+     */
     public MetaInformation getSelectedMetaInformation() {
         return ( _selectedItem );
     }
@@ -82,6 +95,10 @@ public class GameSelectionController {
         private final String _title;
         private int _foundGamesCount;
         
+        /**
+         * Constructor
+         * @param title the game title
+         */
         public LoadMetaInfoWorker(String title){
             this._title = title;
             this._foundGamesCount = 0;
@@ -104,9 +121,6 @@ public class GameSelectionController {
         
         private final ResourceBundle lblBundle = java.util.ResourceBundle.getBundle("LabelsBundle");
         private final ResourceBundle msgBundle = java.util.ResourceBundle.getBundle("MessagesBundle");
-            
-        public GameSelectionListener() {
-        }
 
         public void actionPerformed(ActionEvent ae) {
             if ( ae.getActionCommand().equals(lblBundle.getString("OK"))) {

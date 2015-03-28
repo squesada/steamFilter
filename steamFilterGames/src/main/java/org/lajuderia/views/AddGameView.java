@@ -137,8 +137,7 @@ public class AddGameView extends JDialog {
             pnlButton.add(_btCancel);
             
         return ( pnlButton );
-    }
-    
+    }    
     
     public void registerActionListener(ActionListener listener){
         _btOK.addActionListener((ActionListener) listener);

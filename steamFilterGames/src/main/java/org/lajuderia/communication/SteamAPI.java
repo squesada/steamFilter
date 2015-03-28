@@ -74,7 +74,7 @@ public class SteamAPI {
     }
     
     /**
-     * Gets the game list the user has in his account
+     * Gets the game list the user has in his account from the Steam API
      * @param userId The Steam user identifier
      * @return JSONObject
      * @throws IOException 
