@@ -45,7 +45,7 @@ import org.json.JSONObject;
  */
 public class SteamAPI {
     private static final String STEAM_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("STEAM_DEV_KEY");
-    private static final String METACRITIC_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("METACRITIC_DEV_KEY");
+    private static final String METACRITIC_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("MASHAPE_DEV_KEY");
 
     /**
      * Gets the Metacritic information related to the game

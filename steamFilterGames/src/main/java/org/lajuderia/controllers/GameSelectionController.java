@@ -45,7 +45,7 @@ public class GameSelectionController {
     private final GameSelectionView _view;
     private final GameSelectionListener _listener = new GameSelectionListener();
     private LoadMetaInfoWorker _worker;
-    private MetaInformation _selectedItem;
+    private String _selectedItem;
     private boolean _endOk = false;
     
     /**
@@ -87,7 +87,7 @@ public class GameSelectionController {
      * Gets the selected game from the view
      * @return 
      */
-    public MetaInformation getSelectedMetaInformation() {
+    public String getSelectedMetaInformation() {
         return ( _selectedItem );
     }
     
@@ -135,7 +135,7 @@ public class GameSelectionController {
 
         public void valueChanged(ListSelectionEvent lse) {
             if ( ((JList) lse.getSource()).getSelectedIndex() != -1 ) {
-                _selectedItem = (MetaInformation) ((JList) lse.getSource()).getSelectedValue();
+                _selectedItem = ((JList) lse.getSource()).getSelectedValue().toString();
                 _view.setAllowToAccept(true);
 
             }

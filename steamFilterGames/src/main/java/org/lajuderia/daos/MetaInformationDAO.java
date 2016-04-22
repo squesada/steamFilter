@@ -28,7 +28,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lajuderia.beans.MetaInformation;
-import org.lajuderia.communication.SteamAPI;
+import org.lajuderia.communication.MetaInfoAPI;
 
 /**
  * Data access object related to Metacritic information
@@ -41,13 +41,14 @@ public class MetaInformationDAO {
      * @param title the game title
      * @return List of MetaInformation
      */
-    public static List<MetaInformation> getSimilarGamesFromMetacritic(String title){
-        List<MetaInformation> metaInformation = new ArrayList<MetaInformation>();
+    public static List<String> getSimilarGamesFromMetacritic(String title){
+        List<String> metaInformation = new ArrayList<String>();
         JSONArray jsonMetacritic;
-            jsonMetacritic = SteamAPI.getSimilarMetacriticGames(title);
+            jsonMetacritic = MetaInfoAPI.getSimilarMetacriticGames(title);
             if ( jsonMetacritic != null ){                
                 for ( int i = 0 ; i < jsonMetacritic.length() ; i++ )
-                    metaInformation.add(readGameFromMetacriticJSon(jsonMetacritic.getJSONObject(i)));
+                    metaInformation.add(jsonMetacritic.getString(i));
+                    //metaInformation.add(readGameFromMetacriticJSon(jsonMetacritic.getJSONObject(i)));
             }
             
             return ( metaInformation );
@@ -57,18 +58,31 @@ public class MetaInformationDAO {
         String title = !gameInfo.isNull("name") && gameInfo.get("name") instanceof String
             ? gameInfo.getString("name")
             : "";
-        String summary = !gameInfo.isNull("summary") && gameInfo.get("summary") instanceof String 
-            ? gameInfo.getString("summary") 
+
+        String summary = "";
+
+        String genre = !gameInfo.isNull("genre") && gameInfo.get("genre") instanceof JSONArray
+                && gameInfo.getJSONArray("genre").length() > 0
+            ? gameInfo.getJSONArray("genre").getString(0)
             : "";
-        String genre = !gameInfo.isNull("genre") && gameInfo.get("genre") instanceof String 
-            ? gameInfo.getString("genre") 
-            : "";
-        int metascore = !gameInfo.isNull("score") && gameInfo.get("score") instanceof String && gameInfo.getString("score").matches("[+-]?\\d*(\\.\\d+)?") && !gameInfo.getString("score").equals("")
-            ? gameInfo.getInt("score") 
-            : 0 ;
-        int userscore = !gameInfo.isNull("userscore") && ( gameInfo.get("userscore") instanceof Double || gameInfo.get("userscore") instanceof Integer )
-            ? (int) (gameInfo.getDouble("userscore")*10) 
-            : 0;
+
+        int metascore;
+        int userscore;
+
+        if (!gameInfo.isNull("metacritic") && gameInfo.get("metacritic") instanceof JSONObject) {
+            metascore = !gameInfo.getJSONObject("metacritic").isNull("criticScore")
+                    && gameInfo.getJSONObject("metacritic").getString("criticScore").matches("[+-]?\\d*(\\.\\d+)?")
+                    && !gameInfo.getJSONObject("metacritic").getString("criticScore").equals("")
+                    ? gameInfo.getJSONObject("metacritic").getInt("criticScore")
+                    : 0 ;
+
+            userscore = !gameInfo.getJSONObject("metacritic").isNull("userScore")
+                    && gameInfo.getJSONObject("metacritic").getString("userScore").matches("[+-]?\\d*(\\.\\d+)?")
+                    ? (int) (gameInfo.getJSONObject("metacritic").getDouble("userScore")*10)
+                    : 0;
+        }
+        else
+            metascore = userscore = 0 ;
 
         return ( new MetaInformation(title, summary, genre, metascore, userscore) ) ;
     }
@@ -81,7 +95,7 @@ public class MetaInformationDAO {
     public static MetaInformation findMetaInfoByTitle(String title) {
         MetaInformation metaInformation = null;
         JSONObject json;
-            json = SteamAPI.getMetacriticInfo(title);
+            json = MetaInfoAPI.getMetacriticInfo(title);
             if ( json != null ) {
                 metaInformation = readGameFromMetacriticJSon(json);
             }

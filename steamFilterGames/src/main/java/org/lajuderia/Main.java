@@ -49,4 +49,5 @@ public class Main {
         GameListController controller = new GameListController(view, model);
             view.setVisible(true);
     }
+
 }

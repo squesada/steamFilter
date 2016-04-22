@@ -182,7 +182,7 @@ public class GameListView extends JFrame {
         return ( genres );
     }
 
-    public void setRowSorter(RowSorter sortedModel) {
+    public void setRowSorter(RowSorter<? extends TableModel> sortedModel) {
         this._jtGames.setRowSorter(sortedModel);
     }
 

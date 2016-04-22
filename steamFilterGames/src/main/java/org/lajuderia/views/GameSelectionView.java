@@ -23,6 +23,8 @@
  */
 package org.lajuderia.views;
 
+import org.lajuderia.models.GameSelectionModel;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionListener;
@@ -107,7 +109,7 @@ public class GameSelectionView extends JDialog{
         this.lstGames.addListSelectionListener(listener);
     }
     
-    public void setListModel(ListModel model) {
+    public void setListModel(ListModel<GameSelectionModel> model) {
         lstGames.setModel(model);
     }
     

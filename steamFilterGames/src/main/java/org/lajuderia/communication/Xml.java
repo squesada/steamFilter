@@ -128,6 +128,7 @@ public class Xml {
         element.setAttribute("title", game.getTitle());
         element.setAttribute("genre", game.getGenre());
         element.setAttribute("completed", Boolean.toString(game.isCompleted()));
+        element.setAttribute("favourite", Boolean.toString(game.isFavourite()));
         
         if ( game.hasAssociatedPlatformGame()){
             element.setAttribute("platform", game.getAssociatedGame().getPlatform().toString());
@@ -150,6 +151,7 @@ public class Xml {
             game.setTitle(nodeMap.getNamedItem("title").getNodeValue());
             game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
             game.setCompleted(Boolean.parseBoolean(nodeMap.getNamedItem("completed").getNodeValue()));
+            game.setFavourite(Boolean.parseBoolean(nodeMap.getNamedItem("favourite").getNodeValue()));
             
             if ( nodeMap.getNamedItem("platform") != null ) {
                 AbstractPlatformGame associatedGame;

@@ -33,6 +33,7 @@ public class Game {
     private AbstractPlatformGame _platformGame;
     private MetaInformation _metaInformation;
     private boolean _completed;
+    private boolean _favourite;   
     
     public Game(){
         _platformGame = new DefaultPlatformGame();
@@ -133,6 +134,14 @@ public class Game {
 
     public boolean hasAssociatedPlatformGame() {
         return ( this._platformGame != null );
+    }
+    
+     public boolean isFavourite() {
+        return _favourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        this._favourite = favourite;
     }
     
     @Override

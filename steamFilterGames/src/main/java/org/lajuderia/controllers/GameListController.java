@@ -105,7 +105,7 @@ public class GameListController {
         if ( selectionController.wasOk() ) {
             new UpdateGameWithMetaInformationWorker(
                     (String) _model.getValueAt(_view.getSelectedModelRows()[0],GameListModel.ID_NUM_COLUMN),
-                    selectionController.getSelectedMetaInformation().getTitle()
+                    selectionController.getSelectedMetaInformation()
             ).execute();
         }
     }    

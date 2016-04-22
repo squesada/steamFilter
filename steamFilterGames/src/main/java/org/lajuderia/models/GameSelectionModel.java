@@ -35,7 +35,7 @@ import org.lajuderia.daos.MetaInformationDAO;
  * @author Sergio
  */
 public class GameSelectionModel extends AbstractListModel {
-    private List<MetaInformation> _gameList = new ArrayList<MetaInformation>();
+    private List<String> _gameList = new ArrayList<String>();
     
     /**
      * Updates the model with MetaInformation games with title similar to another

@@ -51,6 +51,8 @@ public class GameListModel extends AbstractTableModel {
     public static final int USERSCORE_NUM_COLUMN = 4 ;
     public static final int MEANSCORE_NUM_COLUMN = 5 ;
     public static final int COMPLETED_NUM_COLUMN = 6 ;
+    public static final int FAVOURITE_NUM_COLUMN = 7 ;
+    
     private final ResourceBundle textBundle =
             java.util.ResourceBundle.getBundle("TextsBundle");
 
@@ -61,7 +63,8 @@ public class GameListModel extends AbstractTableModel {
         textBundle.getString("GAME_METASCORE"),
         textBundle.getString("GAME_USERSCORE"),
         textBundle.getString("GAME_MEANSCORE"),
-        textBundle.getString("GAME_COMPLETED")
+        textBundle.getString("GAME_COMPLETED"),
+        textBundle.getString("GAME_FAVOURITE")
     };
 
     private final ArrayListGame _gameList = new ArrayListGame();
@@ -180,7 +183,9 @@ public class GameListModel extends AbstractTableModel {
     public Class getColumnClass(int columnIndex) {
         Class columnClass;
 
-        if ( columnIndex == COMPLETED_NUM_COLUMN )
+        if ( ( columnIndex == COMPLETED_NUM_COLUMN )
+                || (columnIndex == FAVOURITE_NUM_COLUMN) 
+                )
             columnClass = java.lang.Boolean.class;
         else if ( (columnIndex == METASCORE_NUM_COLUMN)
                 || (columnIndex == USERSCORE_NUM_COLUMN)
@@ -199,6 +204,7 @@ public class GameListModel extends AbstractTableModel {
                 (column == COMPLETED_NUM_COLUMN)
                 || (column == TITLE_NUM_COLUMN)
                 || (column == GENRE_NUM_COLUMN)
+                || (column == FAVOURITE_NUM_COLUMN)
             );
     }
 
@@ -255,6 +261,9 @@ public class GameListModel extends AbstractTableModel {
             case COMPLETED_NUM_COLUMN:
                 result = _gameList.get(row).isCompleted();
                 break;
+            case FAVOURITE_NUM_COLUMN:
+                result = _gameList.get(row).isFavourite();
+                break;
         }
         
         return ( result );
@@ -288,6 +297,9 @@ public class GameListModel extends AbstractTableModel {
                 break;
             case COMPLETED_NUM_COLUMN:
                 _gameList.get(row).setCompleted((Boolean) value);
+                break;
+            case FAVOURITE_NUM_COLUMN:
+                _gameList.get(row).setFavourite((Boolean) value);
                 break;
         }
     }

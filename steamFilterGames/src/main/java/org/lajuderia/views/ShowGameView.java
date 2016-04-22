@@ -31,6 +31,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import org.lajuderia.beans.Game;
 
@@ -39,7 +40,9 @@ import org.lajuderia.beans.Game;
  * @author Sergio
  */
 public class ShowGameView extends JDialog {
-    private Game _game;
+    private final Game _game;
+    private final int TEXTAREA_WIDTH = 100;
+    private final int TEXTAREA_HEIGHT = 100 ;
     
     public ShowGameView(JFrame parent, Game game) {
         super(parent, true);
@@ -93,7 +96,7 @@ public class ShowGameView extends JDialog {
         
         JPanel pnl;
             if ( _game.hasMetaInformation() ) {
-                pnl = new JPanel(new GridLayout(4, 2, 2, 2));
+                pnl = new JPanel(new GridLayout(5, 2, 2, 2));
                 pnl.setBorder(BorderFactory.createTitledBorder(bundle.getString("GAME_METAINFORMATION_TITLE")));
                 addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_TITLE"), _game.getMetaInformation().getTitle());
                 addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_GENRE"), _game.getMetaInformation().getGenre());
