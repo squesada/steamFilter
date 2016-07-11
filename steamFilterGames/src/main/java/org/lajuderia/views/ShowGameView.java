@@ -31,7 +31,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import org.lajuderia.beans.Game;
 
@@ -61,6 +60,7 @@ public class ShowGameView extends JDialog {
             this.add(createMainInfoPanel());
             this.add(createPlatformPanel());
             this.add(createMetaInformationPanel());
+            this.add(createTimeToBeatPanel());
             
         this.pack();
     }
@@ -95,19 +95,41 @@ public class ShowGameView extends JDialog {
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("LabelsBundle");
         
         JPanel pnl;
-            if ( _game.hasMetaInformation() ) {
+            if ( _game.hasIGDBInformation() ) {
                 pnl = new JPanel(new GridLayout(5, 2, 2, 2));
-                pnl.setBorder(BorderFactory.createTitledBorder(bundle.getString("GAME_METAINFORMATION_TITLE")));
-                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_TITLE"), _game.getMetaInformation().getTitle());
-                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_GENRE"), _game.getMetaInformation().getGenre());
-                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_METASCORE"), Integer.toString(_game.getMetaInformation().getMetascore()));
-                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_USERSCORE"), Integer.toString(_game.getMetaInformation().getUserscore()));                
+                pnl.setBorder(BorderFactory.createTitledBorder(bundle.getString("GAME_IGDB_TITLE")));
+                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_PLATFORM_ID"), Integer.toString(_game.getIGDBInformation().getId()));
+                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_TITLE"), _game.getIGDBInformation().getTitle());
+                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_GENRE"), _game.getIGDBInformation().getGenre());
+                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_RATING"), Integer.toString((int) _game.getIGDBInformation().getRating()));
+                addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_AGGREGATED_RATING"), Integer.toString((int) _game.getIGDBInformation().getAggregatedRating()));
+
             }
             else {
                 pnl = new JPanel();
-                pnl.add(new JLabel(java.util.ResourceBundle.getBundle("MessagesBundle").getString("GAME_HAS_NO_METAINFORMATION")));
+                pnl.add(new JLabel(java.util.ResourceBundle.getBundle("MessagesBundle").getString("GAME_HAS_NO_IGDB")));
             }
         
+        return ( pnl );
+    }
+
+    private JPanel createTimeToBeatPanel() {
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("LabelsBundle");
+
+        JPanel pnl;
+        if ( _game.hasIGDBInformation() ) {
+            pnl = new JPanel(new GridLayout(3, 2, 2, 2));
+            pnl.setBorder(BorderFactory.createTitledBorder(bundle.getString("GAME_IGDB_T2B_TITLE")));
+            addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_T2B_HASTILY"), Integer.toString((int) _game.getIGDBInformation().getHastilyT2B()));
+            addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_T2B_NORMALLY"), Integer.toString((int) _game.getIGDBInformation().getNormallyT2B()));
+            addLabeledTextFieldToPanel(pnl, bundle.getString("GAME_T2B_COMPLETELY"), Integer.toString((int) _game.getIGDBInformation().getCompletelyT2B()));
+
+        }
+        else {
+            pnl = new JPanel();
+            pnl.add(new JLabel(java.util.ResourceBundle.getBundle("MessagesBundle").getString("GAME_HAS_NO_IGDB")));
+        }
+
         return ( pnl );
     }
     

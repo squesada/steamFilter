@@ -77,8 +77,8 @@ public class GameListView extends JFrame {
         _btImportFromSteam = new JButton(bundle.getString("IMPORT_GAMES_FROM_STEAM"));
         _btLoadXML = new JButton(bundle.getString("LOAD_GAMES"));
         _btSaveXML = new JButton(bundle.getString("SAVE_GAMES"));
-        _btMetacritic = new JButton(bundle.getString("IMPORT_METACRITIC"));
-        _btMetaSimilar = new JButton(bundle.getString("IMPORT_METACRITIC_MANUAL"));
+        _btMetacritic = new JButton(bundle.getString("IMPORT_IGDB"));
+        _btMetaSimilar = new JButton(bundle.getString("IMPORT_IGDB_MANUAL"));
         
         JPanel pnlMenu = new JPanel(new FlowLayout());
             pnlMenu.add(_btAddGame);

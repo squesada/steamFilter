@@ -28,7 +28,9 @@ package org.lajuderia.communication;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import org.lajuderia.beans.MetaInformation;
+
+import org.lajuderia.beans.IGDBInformation;
+
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -135,21 +137,27 @@ public class Xml {
             element.setAttribute("platformid", Integer.toString(game.getAssociatedGame().getId()));
             element.setAttribute("platformname", game.getAssociatedGame().getTitle());
         }
-        
-        if ( game.hasMetaInformation() ) {
-            element.setAttribute("metaname", game.getMetaInformation().getTitle());
-            element.setAttribute("metadescription", game.getMetaInformation().getSummary());
-            element.setAttribute("metagenre", game.getMetaInformation().getGenre());
-            element.setAttribute("metascore", Integer.toString(game.getMetaInformation().getMetascore()));
-            element.setAttribute("userscore", Integer.toString(game.getMetaInformation().getUserscore()));
-        }        
+
+        if ( game.hasIGDBInformation() ) {
+            element.setAttribute("metaid", Integer.toString(game.getIGDBInformation().getId()));
+            element.setAttribute("metatitle", game.getIGDBInformation().getTitle());
+            element.setAttribute("metasummary", game.getIGDBInformation().getSummary());
+            element.setAttribute("metastoryline", game.getIGDBInformation().getStoryLine());
+            element.setAttribute("metagenre", game.getIGDBInformation().getGenre());
+            element.setAttribute("metarating", Float.toString(game.getIGDBInformation().getRating()));
+            element.setAttribute("metaaggregatedrating", Float.toString(game.getIGDBInformation().getAggregatedRating()));
+            element.setAttribute("metat2bhastily", Float.toString(game.getIGDBInformation().getHastilyT2B()));
+            element.setAttribute("metat2bnormally", Float.toString(game.getIGDBInformation().getNormallyT2B()));
+            element.setAttribute("metat2bcompletely", Float.toString(game.getIGDBInformation().getCompletelyT2B()));
+            element.setAttribute("metacovercloudinaryid", game.getIGDBInformation().getCoverCloudinaryId());
+        }
     }
 
     private Game readGameFromNamedNodeMap(NamedNodeMap nodeMap) {
         Game game ;
             game = new Game();
             game.setTitle(nodeMap.getNamedItem("title").getNodeValue());
-            game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
+            //game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
             game.setCompleted(Boolean.parseBoolean(nodeMap.getNamedItem("completed").getNodeValue()));
             game.setFavourite(Boolean.parseBoolean(nodeMap.getNamedItem("favourite").getNodeValue()));
             
@@ -161,21 +169,26 @@ public class Xml {
                     
                 game.setAssociatedGame(associatedGame);
             }
-            
-            if ( nodeMap.getNamedItem("metaname") != null ) {
-                MetaInformation metaInformation;
-                    metaInformation = new MetaInformation(
-                        nodeMap.getNamedItem("metaname").getNodeValue(),
-                        nodeMap.getNamedItem("metadescription").getNodeValue(),
+
+            if ( nodeMap.getNamedItem("metaid") != null ) {
+                IGDBInformation igdbInformation;
+                    igdbInformation = new IGDBInformation(
+                        Integer.parseInt(nodeMap.getNamedItem("metaid").getNodeValue()),
+                        nodeMap.getNamedItem("metatitle").getNodeValue(),
+                        nodeMap.getNamedItem("metasummary").getNodeValue(),
+                        nodeMap.getNamedItem("metastoryline").getNodeValue(),
                         nodeMap.getNamedItem("metagenre").getNodeValue(),
-                        Integer.parseInt(nodeMap.getNamedItem("metascore").getNodeValue()),
-                        Integer.parseInt(nodeMap.getNamedItem("userscore").getNodeValue())
+                        Float.parseFloat(nodeMap.getNamedItem("metarating").getNodeValue()),
+                        Float.parseFloat(nodeMap.getNamedItem("metaaggregatedrating").getNodeValue()),
+                        Float.parseFloat(nodeMap.getNamedItem("metat2bhastily").getNodeValue()),
+                        Float.parseFloat(nodeMap.getNamedItem("metat2bnormally").getNodeValue()),
+                        Float.parseFloat(nodeMap.getNamedItem("metat2bcompletely").getNodeValue()),
+                        nodeMap.getNamedItem("metacovercloudinaryid").getNodeValue()
                     );
                     
-                game.setMetaInformation(metaInformation);
+                game.setMetaInformation(igdbInformation);
                 
             }  
-            
             return ( game );
     }
 }

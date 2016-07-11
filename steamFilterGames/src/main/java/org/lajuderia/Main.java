@@ -44,6 +44,13 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        /*
+        try {
+
+        org.lajuderia.communication.IGDBAPI.getInstance();
+        }
+        catch (Exception e){System.out.println(e.getMessage());}
+        */
         GameListView view = new GameListView();
         GameListModel model = new GameListModel();
         GameListController controller = new GameListController(view, model);

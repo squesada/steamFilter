@@ -31,7 +31,7 @@ public class Game {
     private String _title;
     private String _genre;
     private AbstractPlatformGame _platformGame;
-    private MetaInformation _metaInformation;
+    private IGDBInformation _igdbInformation;
     private boolean _completed;
     private boolean _favourite;   
     
@@ -96,22 +96,22 @@ public class Game {
     }
 
     /**
-     * @return the _metaInformation
+     * @return the _igdbInformation
      */
-    public MetaInformation getMetaInformation() {
-        return _metaInformation;
+    public IGDBInformation getIGDBInformation() {
+        return _igdbInformation;
     }
 
     /**
-     * @param metaInformation the _metaInformation to set
+     * @param igdbInformation the _igdbInformation to set
      */
-    public void setMetaInformation(MetaInformation metaInformation) {
-        this._metaInformation = metaInformation;
+    public void setMetaInformation(IGDBInformation igdbInformation) {
+        this._igdbInformation = igdbInformation;
 
-        if ( ( metaInformation != null) && 
+        if ( ( igdbInformation != null) &&
                 ((_genre == null) || (_genre.isEmpty()))
                 )
-            _genre = metaInformation.getGenre();
+            _genre = igdbInformation.getGenre();
     }
 
     /**
@@ -128,8 +128,8 @@ public class Game {
         this._completed = completed;
     }
     
-    public boolean hasMetaInformation(){
-        return ( this._metaInformation != null ) ;
+    public boolean hasIGDBInformation(){
+        return ( this._igdbInformation != null ) ;
     }    
 
     public boolean hasAssociatedPlatformGame() {
@@ -153,7 +153,7 @@ public class Game {
                 && (_genre.equals(((Game) obj)._genre))
                 && (_completed == ((Game) obj)._completed)
                 && (_platformGame.equals(((Game) obj)._platformGame))
-                && (_metaInformation.equals(((Game) obj)._metaInformation))
+                && (_igdbInformation.equals(((Game) obj)._igdbInformation))
                 );
     }
 
@@ -163,7 +163,7 @@ public class Game {
         hash = 23 * hash + (this._title != null ? this._title.hashCode() : 0);
         hash = 23 * hash + (this._genre != null ? this._genre.hashCode() : 0);
         hash = 23 * hash + (this._platformGame != null ? this._platformGame.hashCode() : 0);
-        hash = 23 * hash + (this._metaInformation != null ? this._metaInformation.hashCode() : 0);
+        hash = 23 * hash + (this._igdbInformation != null ? this._igdbInformation.hashCode() : 0);
         hash = 23 * hash + (this._completed ? 1 : 0);
         return hash;
     }

@@ -26,6 +26,8 @@ package org.lajuderia.models;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.lajuderia.beans.IGDBInformation;
 import org.lajuderia.communication.Xml;
 import org.lajuderia.beans.SteamGame;
 import java.util.Iterator;
@@ -35,8 +37,7 @@ import java.util.TreeSet;
 import javax.swing.table.AbstractTableModel;
 import org.lajuderia.beans.AbstractPlatformGame;
 import org.lajuderia.beans.Game;
-import org.lajuderia.beans.MetaInformation;
-import org.lajuderia.daos.MetaInformationDAO;
+import org.lajuderia.daos.IGDBInformationDAO;
 import org.lajuderia.daos.SteamGameDAO;
 
 /**
@@ -47,9 +48,9 @@ public class GameListModel extends AbstractTableModel {
     public static final int ID_NUM_COLUMN = 0 ;
     public static final int TITLE_NUM_COLUMN = 1 ;
     public static final int GENRE_NUM_COLUMN = 2 ;
-    public static final int METASCORE_NUM_COLUMN = 3 ;
-    public static final int USERSCORE_NUM_COLUMN = 4 ;
-    public static final int MEANSCORE_NUM_COLUMN = 5 ;
+    public static final int RATING_NUM_COLUMN = 3 ;
+    public static final int AGGREGATED_RATING_NUM_COLUMN = 4 ;
+    public static final int T2B_NORMALLY_NUM_COLUMN = 5 ;
     public static final int COMPLETED_NUM_COLUMN = 6 ;
     public static final int FAVOURITE_NUM_COLUMN = 7 ;
     
@@ -60,12 +61,14 @@ public class GameListModel extends AbstractTableModel {
         textBundle.getString("GAME_ID"),
         textBundle.getString("GAME_TITLE"),
         textBundle.getString("GAME_GENRE"),
-        textBundle.getString("GAME_METASCORE"),
-        textBundle.getString("GAME_USERSCORE"),
-        textBundle.getString("GAME_MEANSCORE"),
+        textBundle.getString("GAME_RATING"),
+        textBundle.getString("GAME_AGGREGATED_RATING"),
+        textBundle.getString("GAME_T2B_NORMALLY"),
         textBundle.getString("GAME_COMPLETED"),
         textBundle.getString("GAME_FAVOURITE")
     };
+
+
 
     private final ArrayListGame _gameList = new ArrayListGame();
     
@@ -141,12 +144,12 @@ public class GameListModel extends AbstractTableModel {
     }
     
     /**
-     * Updates a game with the Metacritic information
+     * Updates a game with the IGDB information
      * @param id Game ID
      * @return Boolean (true when the game has been update)
      */
-    public boolean updateGameWithMetaInfoAuto(String id) {
-        boolean result = updateGameWithMetaInfoManual(id, null);
+    public boolean updateGameWithIGDBInfoAuto(String id) {
+        boolean result = updateGameWithIGDBInfoManual(id, null);
         if ( result )
             fireTableDataChanged();
         
@@ -156,18 +159,19 @@ public class GameListModel extends AbstractTableModel {
     /**
      * Updates a game with the Metacritic information related to a game
      * @param id Game ID
-     * @param title Game title to search
+     * @param igdbInfo Game title to search
      * @return Boolean (true when the game has been updated)
      */
-    public boolean updateGameWithMetaInfoManual(String id, String title) {
+    public boolean updateGameWithIGDBInfoManual(String id, IGDBInformation igdbInformation) {
         boolean gameChanged = false ;
         Game theGame = _gameList.findGameById(id);
         
         if ( theGame != null ) {
-            MetaInformation metaInformation = MetaInformationDAO.findMetaInfoByTitle(title != null ? title : theGame.getTitle());
-                
-            if ( metaInformation != null && (!theGame.hasMetaInformation() || !metaInformation.equals(theGame.getMetaInformation())) ) {
-                theGame.setMetaInformation(metaInformation);
+            if ( igdbInformation == null )
+                igdbInformation = IGDBInformationDAO.findInfoByTitle(theGame.getTitle());
+
+            if ( igdbInformation != null && (!theGame.hasIGDBInformation() || !igdbInformation.equals(theGame.getIGDBInformation())) ) {
+                theGame.setMetaInformation(igdbInformation);
                 
                 gameChanged = true;
             }
@@ -187,9 +191,9 @@ public class GameListModel extends AbstractTableModel {
                 || (columnIndex == FAVOURITE_NUM_COLUMN) 
                 )
             columnClass = java.lang.Boolean.class;
-        else if ( (columnIndex == METASCORE_NUM_COLUMN)
-                || (columnIndex == USERSCORE_NUM_COLUMN)
-                || (columnIndex == MEANSCORE_NUM_COLUMN)
+        else if ( (columnIndex == RATING_NUM_COLUMN)
+                || (columnIndex == T2B_NORMALLY_NUM_COLUMN)
+                || (columnIndex == AGGREGATED_RATING_NUM_COLUMN)
                 )
             columnClass = java.lang.Integer.class;
         else
@@ -240,22 +244,17 @@ public class GameListModel extends AbstractTableModel {
             case GENRE_NUM_COLUMN:
                 result = _gameList.get(row).getGenre();
                 break;
-            case METASCORE_NUM_COLUMN:
-                if ( _gameList.get(row).hasMetaInformation() )
-                    result = _gameList.get(row).getMetaInformation().getMetascore();
+            case RATING_NUM_COLUMN:
+                if ( _gameList.get(row).hasIGDBInformation() )
+                    result = (int) _gameList.get(row).getIGDBInformation().getRating();
                 break;
-            case USERSCORE_NUM_COLUMN:
-                if ( _gameList.get(row).hasMetaInformation() )
-                    result = _gameList.get(row).getMetaInformation().getUserscore();
+            case T2B_NORMALLY_NUM_COLUMN:
+                if ( _gameList.get(row).hasIGDBInformation() )
+                    result = (int) _gameList.get(row).getIGDBInformation().getNormallyT2B();
                 break;
-            case MEANSCORE_NUM_COLUMN:
-                if ( _gameList.get(row).hasMetaInformation() ) {
-                    result = _gameList.get(row).getMetaInformation().getMetascore() == 0
-                            ? _gameList.get(row).getMetaInformation().getUserscore()
-                            : (_gameList.get(row).getMetaInformation().getUserscore() == 0
-                                ? _gameList.get(row).getMetaInformation().getMetascore()
-                                : (_gameList.get(row).getMetaInformation().getMetascore()
-                                    + _gameList.get(row).getMetaInformation().getUserscore()) /2);
+            case AGGREGATED_RATING_NUM_COLUMN:
+                if ( _gameList.get(row).hasIGDBInformation() ) {
+                    result = (int) _gameList.get(row).getIGDBInformation().getAggregatedRating();
                 }
                 break;
             case COMPLETED_NUM_COLUMN:

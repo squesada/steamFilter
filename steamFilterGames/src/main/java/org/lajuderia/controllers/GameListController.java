@@ -80,7 +80,7 @@ public class GameListController {
         _model.saveGamesToDisk();        
     }
     
-    private void updateGamesWithMetaInfoAuto() {
+    private void updateGamesWithIGDBInfoAuto() {
         int[] selectedRows ;
             selectedRows = _view.getSelectedModelRows();
             
@@ -90,10 +90,11 @@ public class GameListController {
                 ids[i] = (String) _model.getValueAt(selectedRows[i], GameListModel.ID_NUM_COLUMN);
             }
             
-        new LoadMetacriticInfoWorker(ids).execute();
+        new LoadIGDBInfoWorker(ids).execute();
     }
     
-    private void updateGameWithMetaInfoManual() {
+    private boolean updateGameWithIGDBInfoManual() {
+        String message;
         GameSelectionModel selectionModel = new GameSelectionModel();
         GameSelectionView selectionView;
             selectionView = new GameSelectionView(_view);            
@@ -103,11 +104,13 @@ public class GameListController {
             selectionView.setVisible(true);
             
         if ( selectionController.wasOk() ) {
-            new UpdateGameWithMetaInformationWorker(
-                    (String) _model.getValueAt(_view.getSelectedModelRows()[0],GameListModel.ID_NUM_COLUMN),
+            _model.updateGameWithIGDBInfoManual(
+                    (String) _model.getValueAt(_view.getSelectedModelRows()[0], GameListModel.ID_NUM_COLUMN),
                     selectionController.getSelectedMetaInformation()
-            ).execute();
+            );
         }
+
+        return ( selectionController.wasOk() );
     }    
 
     private void addNewGameToModel() {
@@ -192,12 +195,15 @@ public class GameListController {
                     else
                         resultMessage = msgBundle.getString("OPERATION_CANCELLED");
                 }
-                else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC"))) {
-                    updateGamesWithMetaInfoAuto();
-                    resultMessage = msgBundle.getString("METACRITIC_INFO_EXECUTED");
-                } else if ( command.equals(lblBundle.getString("IMPORT_METACRITIC_MANUAL"))) {
+                else if ( command.equals(lblBundle.getString("IMPORT_IGDB"))) {
+                    updateGamesWithIGDBInfoAuto();
+                    resultMessage = msgBundle.getString("IGDB_INFO_EXECUTED");
+                } else if ( command.equals(lblBundle.getString("IMPORT_IGDB_MANUAL"))) {
                     if ( _view.getSelectedModelRows().length == 1 ) {
-                        updateGameWithMetaInfoManual();
+                        if ( updateGameWithIGDBInfoManual() )
+                            resultMessage = msgBundle.getString("IGDB_INFO_LOADED");
+                        else
+                            resultMessage = msgBundle.getString("IGDB_PROCESS_ABORTED");
                     }
                     else
                         resultMessage = msgBundle.getString("SELECT_JUST_ONE_GAME");
@@ -256,16 +262,16 @@ public class GameListController {
     }
     
     /**
-     * Worker which loads Metacritic information from a list of games
+     * Worker which loads IGDB information from a list of games
      */
-    public class LoadMetacriticInfoWorker extends SwingWorker<Boolean, Integer> {
+    public class LoadIGDBInfoWorker extends SwingWorker<Boolean, Integer> {
         private final String[] _gameIds;
         
         /**
          * Constructor
          * @param gameIds List of game IDs 
          */
-        public LoadMetacriticInfoWorker(String[] gameIds){
+        public LoadIGDBInfoWorker(String[] gameIds){
             this._gameIds = gameIds;
         }
 
@@ -275,7 +281,7 @@ public class GameListController {
             boolean wasOk = true;
             
             for ( String id : _gameIds ) {
-                if ( _model.updateGameWithMetaInfoAuto(id) ) {
+                if ( _model.updateGameWithIGDBInfoAuto(id) ) {
                     ++count;
                     publish(count);
                 }
@@ -289,7 +295,7 @@ public class GameListController {
         
          @Override
         protected void process(List<Integer> chunks) {
-            _view.setStatusBarMessage(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADING"), chunks.get(0), _gameIds.length));
+            _view.setStatusBarMessage(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("IGDB_INFO_LOADING"), chunks.get(0), _gameIds.length));
         }
         
         @Override
@@ -298,8 +304,8 @@ public class GameListController {
             
             try {
                 message = get()
-                        ? java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED")
-                        : java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_NOT_LOADED");                    
+                        ? java.util.ResourceBundle.getBundle("MessagesBundle").getString("IGDB_INFO_LOADED")
+                        : java.util.ResourceBundle.getBundle("MessagesBundle").getString("IGDB_INFO_NOT_LOADED");
             } catch (InterruptedException ex) {
                 message = ex.getMessage();
             } catch (ExecutionException ex) {
@@ -335,48 +341,6 @@ public class GameListController {
         @Override
         protected void done(){
             _view.setStatusBarMessage(String.format(java.util.ResourceBundle.getBundle("MessagesBundle").getString("STEAM_LOADED"), _loadedGamesCount));
-        }        
-    }
-    
-    /**
-     * Worker which loads Metacritic information from a game
-     */
-    public class UpdateGameWithMetaInformationWorker extends SwingWorker<Boolean,Void> {
-        private final String _id;
-        private final String _title;
-        
-        /**
-         * Constructor
-         * @param id Steam game ID
-         * @param title Metacritic game title
-         */
-        public UpdateGameWithMetaInformationWorker(String id, String title) {
-            this._id = id;
-            this._title = title;
-        }
-        
-        @Override
-        protected Boolean doInBackground() throws Exception {
-            _view.setStatusBarMessage(java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_EXECUTED"));
-                        
-            return ( _model.updateGameWithMetaInfoManual(_id, _title) );
-        }
-
-        @Override
-        protected void done() {
-            String message;
-            
-            try {
-                message = get()
-                        ? java.util.ResourceBundle.getBundle("MessagesBundle").getString("METACRITIC_INFO_LOADED")
-                        : java.util.ResourceBundle.getBundle("MessagesBundle").getString("GAME_HAS_NO_METAINFORMATION");
-            } catch (InterruptedException ex) {
-                message = ex.getMessage();
-            } catch (ExecutionException ex) {
-                message = ex.getMessage();
-            }
-                        
-            _view.setStatusBarMessage(message);            
         }        
     }
 }

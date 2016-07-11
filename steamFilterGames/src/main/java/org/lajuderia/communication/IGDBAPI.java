@@ -40,31 +40,36 @@ import java.nio.charset.Charset;
  *
  * @author Sergio Quesada <squesada.dev@gmail.com>
  */
-public class MetaInfoAPI {
-    private static final String MASHAPE_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("MASHAPE_DEV_KEY");
+public class IGDBAPI {
+    private static final String MASHAPE_DEV_KEY = java.util.ResourceBundle.getBundle("ConfigurationBundle").getString("IGDB_DEV_KEY");
+    private static final int HTTP_OK_STATUS_CODE = 200;
 
     /**
      * Gets the Metacritic information related to the game
      * @param gameTitle The title game
      * @return JSONObject
      */
-    public static JSONObject getMetacriticInfo(String gameTitle) {
+    public static JSONObject getIGDBInfo(String gameTitle) {
         JSONObject gameInfo = null;
         HttpResponse<JsonNode> response;
             try{
-                response = Unirest.get("https://ahmedakhan-game-review-information-v1.p.mashape.com/api/v1/information?game_name=" + gameTitle)
+                response = Unirest.get("https://igdbcom-internet-game-database-v1.p.mashape.com/games/?" +
+                        "fields=id,name,summary,storyline,genres,rating,aggregated_rating,time_to_beat,cover.cloudinary_id&limit=2&filter[name][eq]=" + gameTitle)
                         .header("X-Mashape-Key", MASHAPE_DEV_KEY)
                         .header("Accept", "application/json")
                         .asJson();
 
-                    if ( response.getBody().getObject().has("result") )
-                        gameInfo = response.getBody().getObject().getJSONObject("result");
+                    if (
+                            response.getCode() == HTTP_OK_STATUS_CODE &&
+                            response.getBody().getArray().length() == 1
+                        )
+                        gameInfo = response.getBody().getArray().getJSONObject(0);
             } catch(UnirestException uex){
             } catch(JSONException jex){
             }
             return ( gameInfo ) ;
     }
-        
+
     private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -90,17 +95,22 @@ public class MetaInfoAPI {
      * @param metaTitle The title game
      * @return JSONArray
      */
-    public static JSONArray getSimilarMetacriticGames(String metaTitle) {
+
+    public static JSONArray getSimilarIGDBGames(String metaTitle) {
         JSONArray similarGames = null;
         HttpResponse<JsonNode> response;
             try{
-                response = Unirest.get("https://ahmedakhan-game-review-information-v1.p.mashape.com/api/v1/search?game_name=" + metaTitle)
+                response = Unirest.get("https://igdbcom-internet-game-database-v1.p.mashape.com/games/?" +
+                        "fields=id,name,summary,storyline,genres,rating,aggregated_rating,time_to_beat,cover.cloudinary_id&limit=20&search=" + metaTitle)
                         .header("X-Mashape-Key", MASHAPE_DEV_KEY)
                         .header("Accept", "application/json")
                         .asJson();
 
-                    if ( response.getBody().getObject().has("result") )
-                        similarGames = response.getBody().getObject().getJSONArray("result");
+                    if (
+                        response.getCode() == HTTP_OK_STATUS_CODE
+                            && response.getBody().getArray().length() > 0
+                        )
+                        similarGames = response.getBody().getArray();
             } catch(UnirestException uex){
                 //TODO: Controlar si no hay conexión a Internet
             } catch(JSONException jex){                

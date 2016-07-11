@@ -27,33 +27,34 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.AbstractListModel;
-import org.lajuderia.beans.MetaInformation;
-import org.lajuderia.daos.MetaInformationDAO;
+
+import org.lajuderia.beans.IGDBInformation;
+import org.lajuderia.daos.IGDBInformationDAO;
 
 /**
  * Model class related to the game selection functionality
  * @author Sergio
  */
 public class GameSelectionModel extends AbstractListModel {
-    private List<String> _gameList = new ArrayList<String>();
+    private List<IGDBInformation> _gameList = new ArrayList<IGDBInformation>();
     
     /**
-     * Updates the model with MetaInformation games with title similar to another
+     * Updates the model with IGDBInformation games with title similar to another
      * @param title the game title
      * @return Integer (Number of similar games)
      */
     public int updateModelWithSimilarMetainfoTo(String title) {
-        _gameList = MetaInformationDAO.getSimilarGamesFromMetacritic(title);
+        _gameList = IGDBInformationDAO.getSimilarGamesFromIGDB(title);
         fireContentsChanged(this, 0, _gameList.size()-1);
                 
         return ( _gameList.size() );
     }
     
     /**
-     * Gets the MetaInformation iterator
-     * @return Iterator of MetaInformation
+     * Gets the IGDBInformation iterator
+     * @return Iterator of IGDBInformation
      */
-    public Iterator<MetaInformation> getMetaInformationIterator() {
+    public Iterator<IGDBInformation> getMetaInformationIterator() {
         Iterator it = null ;
             if ( _gameList != null ) {
                 it = _gameList.iterator();

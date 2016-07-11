@@ -32,7 +32,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import org.lajuderia.beans.MetaInformation;
+
+import org.lajuderia.beans.IGDBInformation;
 import org.lajuderia.models.GameSelectionModel;
 import org.lajuderia.views.GameSelectionView;
 
@@ -45,7 +46,7 @@ public class GameSelectionController {
     private final GameSelectionView _view;
     private final GameSelectionListener _listener = new GameSelectionListener();
     private LoadMetaInfoWorker _worker;
-    private String _selectedItem;
+    private IGDBInformation _selectedItem;
     private boolean _endOk = false;
     
     /**
@@ -87,7 +88,7 @@ public class GameSelectionController {
      * Gets the selected game from the view
      * @return 
      */
-    public String getSelectedMetaInformation() {
+    public IGDBInformation getSelectedMetaInformation() {
         return ( _selectedItem );
     }
     
@@ -135,7 +136,7 @@ public class GameSelectionController {
 
         public void valueChanged(ListSelectionEvent lse) {
             if ( ((JList) lse.getSource()).getSelectedIndex() != -1 ) {
-                _selectedItem = ((JList) lse.getSource()).getSelectedValue().toString();
+                _selectedItem = (IGDBInformation) ((JList) lse.getSource()).getSelectedValue();
                 _view.setAllowToAccept(true);
 
             }
@@ -146,17 +147,17 @@ public class GameSelectionController {
 
         public void insertUpdate(DocumentEvent de) {
             updateGameList();
-            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
+            _view.setMessageStatus(msgBundle.getString("IGDB_INFO_EXECUTED"));
         }
 
         public void removeUpdate(DocumentEvent de) {
             updateGameList();
-            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
+            _view.setMessageStatus(msgBundle.getString("IGDB_INFO_EXECUTED"));
         }
 
         public void changedUpdate(DocumentEvent de) {
             updateGameList();
-            _view.setMessageStatus(msgBundle.getString("METACRITIC_INFO_EXECUTED"));
+            _view.setMessageStatus(msgBundle.getString("IGDB_INFO_EXECUTED"));
         }
     }
     
