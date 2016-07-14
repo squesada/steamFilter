@@ -45,14 +45,14 @@ import org.lajuderia.daos.SteamGameDAO;
  * @author Sergio
  */
 public class GameListModel extends AbstractTableModel {
-    private static final int ID_NUM_COLUMN = 0 ;
-    private static final int TITLE_NUM_COLUMN = 1 ;
-    private static final int GENRE_NUM_COLUMN = 2 ;
-    private static final int RATING_NUM_COLUMN = 3 ;
-    private static final int AGGREGATED_RATING_NUM_COLUMN = 4 ;
-    private static final int T2B_NORMALLY_NUM_COLUMN = 5 ;
-    private static final int COMPLETED_NUM_COLUMN = 6 ;
-    private static final int FAVOURITE_NUM_COLUMN = 7 ;
+    public static final int ID_NUM_COLUMN = 0 ;
+    public static final int TITLE_NUM_COLUMN = 1 ;
+    public static final int GENRE_NUM_COLUMN = 2 ;
+    public static final int RATING_NUM_COLUMN = 3 ;
+    public static final int AGGREGATED_RATING_NUM_COLUMN = 4 ;
+    public static final int T2B_NORMALLY_NUM_COLUMN = 5 ;
+    public static final int COMPLETED_NUM_COLUMN = 6 ;
+    public static final int FAVOURITE_NUM_COLUMN = 7 ;
     
     private final ResourceBundle textBundle =
             java.util.ResourceBundle.getBundle("TextsBundle");
