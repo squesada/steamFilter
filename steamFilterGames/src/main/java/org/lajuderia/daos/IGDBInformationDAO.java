@@ -43,7 +43,7 @@ public class IGDBInformationDAO {
      * @return List of IGDBInformation
      */
     public static List<IGDBInformation> getSimilarGamesFromIGDB(String title){
-        List<IGDBInformation> metaInformation = new ArrayList<IGDBInformation>();
+        List<IGDBInformation> metaInformation = new ArrayList<>();
         JSONArray jsonIGDB;
             jsonIGDB = IGDBAPI.getSimilarIGDBGames(title);
             if ( jsonIGDB != null ){
@@ -111,7 +111,7 @@ public class IGDBInformationDAO {
 
     private static String parseGenreIdToDescription(int igdbGenreId) {
         //TODO: Fix this function
-        String result = null;
+        String result ;
             switch(igdbGenreId) {
                 case 33: result = "Arcade"; break;
                 case 32: result = "Indie"; break;
@@ -143,14 +143,30 @@ public class IGDBInformationDAO {
      * @param title the game title
      * @return IGDBInformation
      */
-    public static IGDBInformation findInfoByTitle(String title) {
+    public static IGDBInformation findMetaInfoByTitle(String title) {
         IGDBInformation igdbInformation = null;
         JSONObject json;
-            json = IGDBAPI.getIGDBInfo(title);
+            json = IGDBAPI.getIGDBInfoByTitle(title);
             if ( json != null ) {
                 igdbInformation = readGameFromIGDBJSon(json);
             }
         
+        return (igdbInformation);
+    }
+
+    /**
+     * Gets the IGDB information related to a game
+     * @param id the game id
+     * @return IGDBInformation
+     */
+    public static IGDBInformation findMetaInfoByID(int id) {
+        IGDBInformation igdbInformation = null;
+        JSONObject json;
+        json = IGDBAPI.getIGDBInfoById(id);
+        if ( json != null ) {
+            igdbInformation = readGameFromIGDBJSon(json);
+        }
+
         return (igdbInformation);
     }
 }

@@ -45,14 +45,14 @@ import org.lajuderia.daos.SteamGameDAO;
  * @author Sergio
  */
 public class GameListModel extends AbstractTableModel {
-    public static final int ID_NUM_COLUMN = 0 ;
-    public static final int TITLE_NUM_COLUMN = 1 ;
-    public static final int GENRE_NUM_COLUMN = 2 ;
-    public static final int RATING_NUM_COLUMN = 3 ;
-    public static final int AGGREGATED_RATING_NUM_COLUMN = 4 ;
-    public static final int T2B_NORMALLY_NUM_COLUMN = 5 ;
-    public static final int COMPLETED_NUM_COLUMN = 6 ;
-    public static final int FAVOURITE_NUM_COLUMN = 7 ;
+    private static final int ID_NUM_COLUMN = 0 ;
+    private static final int TITLE_NUM_COLUMN = 1 ;
+    private static final int GENRE_NUM_COLUMN = 2 ;
+    private static final int RATING_NUM_COLUMN = 3 ;
+    private static final int AGGREGATED_RATING_NUM_COLUMN = 4 ;
+    private static final int T2B_NORMALLY_NUM_COLUMN = 5 ;
+    private static final int COMPLETED_NUM_COLUMN = 6 ;
+    private static final int FAVOURITE_NUM_COLUMN = 7 ;
     
     private final ResourceBundle textBundle =
             java.util.ResourceBundle.getBundle("TextsBundle");
@@ -126,7 +126,7 @@ public class GameListModel extends AbstractTableModel {
         boolean hasChanged = false;
         
         List<Game> newGameList;
-            newGameList = new ArrayList<Game>();
+            newGameList = new ArrayList<>();
             for ( SteamGame currentGame : SteamGameDAO.getUserOwnedGames(userId)) {
                 Game newGame = new Game(currentGame);
                 
@@ -149,27 +149,38 @@ public class GameListModel extends AbstractTableModel {
      * @return Boolean (true when the game has been update)
      */
     public boolean updateGameWithIGDBInfoAuto(String id) {
-        boolean result = updateGameWithIGDBInfoManual(id, null);
-        if ( result )
+        boolean gameChanged = false ;
+        Game theGame = _gameList.findGameById(id);
+
+        if ( theGame != null ) {
+            IGDBInformation igdbInformation = theGame.hasIGDBInformation()
+                    ? IGDBInformationDAO.findMetaInfoByID(theGame.getIGDBInformation().getId())
+                    : IGDBInformationDAO.findMetaInfoByTitle(theGame.getTitle());
+
+            if ( igdbInformation != null && (!theGame.hasIGDBInformation() || !igdbInformation.equals(theGame.getIGDBInformation())) ) {
+                theGame.setMetaInformation(igdbInformation);
+
+                gameChanged = true;
+            }
+        }
+
+        if ( gameChanged )
             fireTableDataChanged();
-        
-        return ( result );
+
+        return ( gameChanged ) ;
     }
     
     /**
      * Updates a game with the Metacritic information related to a game
      * @param id Game ID
-     * @param igdbInfo Game title to search
+     * @param igdbInformation Metainformation related to the game
      * @return Boolean (true when the game has been updated)
      */
     public boolean updateGameWithIGDBInfoManual(String id, IGDBInformation igdbInformation) {
         boolean gameChanged = false ;
         Game theGame = _gameList.findGameById(id);
-        
-        if ( theGame != null ) {
-            if ( igdbInformation == null )
-                igdbInformation = IGDBInformationDAO.findInfoByTitle(theGame.getTitle());
 
+        if ( theGame != null ) {
             if ( igdbInformation != null && (!theGame.hasIGDBInformation() || !igdbInformation.equals(theGame.getIGDBInformation())) ) {
                 theGame.setMetaInformation(igdbInformation);
                 
@@ -273,13 +284,10 @@ public class GameListModel extends AbstractTableModel {
      * @return String[]
      */
     public String[] getGenres() {        
-        TreeSet<String> treeGenres = new TreeSet<String>();
-            if ( _gameList.size() > 0 ) {
-                Iterator<Game> it = _gameList.iterator() ;
-                while ( it.hasNext() ) {
-                    treeGenres.add(it.next().getGenre());
-                }
-        }
+        TreeSet<String> treeGenres = new TreeSet<>();
+            for (Game a_gameList : _gameList) {
+                treeGenres.add(a_gameList.getGenre());
+            }
                 
         return ( Arrays.copyOf(treeGenres.toArray(), treeGenres.size(), String[].class));
     }
@@ -341,7 +349,7 @@ public class GameListModel extends AbstractTableModel {
      * Subclass from ArrayList<Game> which allows find an element by ID
      */
     private class ArrayListGame extends ArrayList<Game> {
-        public Game findGameById(String id) {
+        Game findGameById(String id) {
             Game foundGame = null;
             int position = findGamePositionById(id);
                 if ( position != -1 ) {
@@ -351,7 +359,7 @@ public class GameListModel extends AbstractTableModel {
             return ( foundGame );
         }
         
-        public int findGamePositionById(String id) {            
+        int findGamePositionById(String id) {
             return ( getGamePositionByIdAux(id, 0, this.size()-1 ));
         }
         

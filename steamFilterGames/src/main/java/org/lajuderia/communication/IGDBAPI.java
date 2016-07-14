@@ -46,10 +46,32 @@ public class IGDBAPI {
 
     /**
      * Gets the Metacritic information related to the game
+     * @param gameId The game id
+     * @return JSONObject
+     */
+    public static JSONObject getIGDBInfoById(int gameId) {
+        JSONObject gameInfo = null;
+        HttpResponse<JsonNode> response;
+            try{
+                response = Unirest.get("https://igdbcom-internet-game-database-v1.p.mashape.com/games/" + gameId +
+                        "?fields=id,name,summary,storyline,genres,rating,aggregated_rating,time_to_beat,cover.cloudinary_id")
+                        .header("X-Mashape-Key", MASHAPE_DEV_KEY)
+                        .header("Accept", "application/json")
+                        .asJson();
+
+                if ( response.getCode() == HTTP_OK_STATUS_CODE )
+                    gameInfo = response.getBody().getArray().getJSONObject(0);
+            } catch (UnirestException | JSONException ignored){}
+
+        return ( gameInfo ) ;
+    }
+
+    /**
+     * Gets the Metacritic information related to the game
      * @param gameTitle The title game
      * @return JSONObject
      */
-    public static JSONObject getIGDBInfo(String gameTitle) {
+    public static JSONObject getIGDBInfoByTitle(String gameTitle) {
         JSONObject gameInfo = null;
         HttpResponse<JsonNode> response;
             try{
@@ -64,10 +86,8 @@ public class IGDBAPI {
                             response.getBody().getArray().length() == 1
                         )
                         gameInfo = response.getBody().getArray().getJSONObject(0);
-            } catch(UnirestException uex){
-            } catch(JSONException jex){
-            }
-            return ( gameInfo ) ;
+            } catch(UnirestException | JSONException ignored) {}
+        return ( gameInfo ) ;
     }
 
     private static String readAll(Reader rd) throws IOException {
@@ -80,14 +100,13 @@ public class IGDBAPI {
     }
 
     private static JSONObject readJsonFromUrl(String url) throws IOException {
-      InputStream is = new URL(url).openStream();
-      try {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-        JSONObject json = new JSONObject(readAll(rd));
-            return json;
-      } finally {
-        is.close();
-      }
+        JSONObject json ;
+            InputStream is = new URL(url).openStream();
+                BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+                    json = new JSONObject(readAll(rd));
+                    is.close();
+
+        return json;
     }
 
     /**
@@ -111,11 +130,10 @@ public class IGDBAPI {
                             && response.getBody().getArray().length() > 0
                         )
                         similarGames = response.getBody().getArray();
-            } catch(UnirestException uex){
+            } catch(UnirestException | JSONException ignored){
                 //TODO: Controlar si no hay conexión a Internet
-            } catch(JSONException jex){                
             }
-            
-            return ( similarGames ) ;
+
+        return ( similarGames ) ;
     }
 }

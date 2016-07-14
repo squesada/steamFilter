@@ -37,27 +37,27 @@ public class IGDBInformation {
         private float _normally;
         private float _completely;
 
-        public float getCompletely() {
+        float getCompletely() {
             return _completely;
         }
 
-        public float getHastily() {
+        float getHastily() {
             return _hastily;
         }
 
-        public float getNormally() {
+        float getNormally() {
             return _normally;
         }
 
-        public boolean hasCompletely() {
+        boolean hasCompletely() {
             return _completely != 0;
         }
 
-        public boolean hastHastily() {
+        boolean hastHastily() {
             return _hastily != 0;
         }
 
-        public boolean hasNormally() {
+        boolean hasNormally() {
             return _normally != 0;
         }
 
@@ -99,8 +99,7 @@ public class IGDBInformation {
     private String mCoverCloudinaryId;
     private float mAggregatedRating;
 
-    public IGDBInformation(){
-    }
+    public IGDBInformation(){}
     
     public IGDBInformation(int id, String title, String summary, String storyLine, String genre,
                            float rating, float aggregatedRating, float t2bHastily, float t2bNormally, float t2bCompletely, String coverCloudinaryId){
@@ -193,7 +192,7 @@ public class IGDBInformation {
         this.mCoverCloudinaryId = coverCloudinaryId;
     }
 
-    public void setTimeToBeat(float hastily, float normally, float completely) {
+    private void setTimeToBeat(float hastily, float normally, float completely) {
         this.mTime2Beat = new Time2Beat(hastily, normally, completely);
     }
 
@@ -240,12 +239,7 @@ public class IGDBInformation {
         DecimalFormat df = new DecimalFormat("##.#");
             df.setRoundingMode(RoundingMode.DOWN);
 
-        return ( new StringBuilder()
-                .append(mTitle)
-                .append(" (R:")
-                .append(df.format(mRating))
-                .append(")")
-                .toString() );
+        return ( mTitle + " (R:" + df.format(mRating) + ")" );
     }
     
     @Override
@@ -260,18 +254,21 @@ public class IGDBInformation {
                 && (this.mGenre.equals(((IGDBInformation) obj).mGenre))
                 && (this.mRating == ((IGDBInformation) obj).mRating)
                 && (this.mTime2Beat.equals(((IGDBInformation) obj).mTime2Beat))
+                && (this.mCoverCloudinaryId.equals(((IGDBInformation) obj).mCoverCloudinaryId))
                 );        
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 89 * hash + this.mId;
         hash = 89 * hash + (this.mTitle != null ? this.mTitle.hashCode() : 0);
         hash = 89 * hash + (this.mSummary != null ? this.mSummary.hashCode() : 0);
         hash = 89 * hash + (this.mStoryLine != null ? this.mStoryLine.hashCode() : 0);
         hash = 89 * hash + (this.mGenre != null ? this.mGenre.hashCode() : 0);
         hash = 89 * hash + Float.floatToIntBits(mRating);
         hash = 89 * hash + this.mTime2Beat.hashCode();
+        hash = 89 * hash + (this.mCoverCloudinaryId != null ? this.mCoverCloudinaryId.hashCode() : 0);
         return hash;
     }
 }

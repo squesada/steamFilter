@@ -58,7 +58,7 @@ import org.xml.sax.SAXException;
  * @author Sergio
  */
 public class Xml {
-    public final static String TAG = "communication.Xml";
+    private final static String TAG = "communication.Xml";
     
     /**
      * Loads the xml which contains the game list previously saved from disk
@@ -66,20 +66,16 @@ public class Xml {
      * @throws org.lajuderia.exceptions.CustomException
      */
     public List<Game> loadGamesFromDisk() throws CustomException {        
-        List<Game> gameList = new ArrayList<Game>();
+        List<Game> gameList = new ArrayList<>();
         
-        Document doc = null ;
+        Document doc;
             try {
                 doc = getNewDocumentBuilder().parse(new java.io.File("steamgames.xml"));
-            } catch ( IOException ex ) {
-                throw (new CustomException(TAG, ex));
-            } catch ( ParserConfigurationException ex ) {
-                throw (new CustomException(TAG, ex));
-            } catch ( SAXException ex ) {
+            } catch ( IOException | ParserConfigurationException | SAXException ex ) {
                 throw (new CustomException(TAG, ex));
             }
-            
-            for ( int i = 0 ; i < doc.getDocumentElement().getChildNodes().getLength() ; i++){
+
+        for ( int i = 0 ; i < doc.getDocumentElement().getChildNodes().getLength() ; i++){
                  Game game;
                     game = readGameFromNamedNodeMap(doc.getDocumentElement().getChildNodes().item(i).getAttributes()) ;
                     gameList.add(game);
@@ -94,21 +90,20 @@ public class Xml {
      * @throws org.lajuderia.exceptions.CustomException 
      */
     public void saveGamesToDisk(Collection<Game> gameList) throws CustomException {
-        Document xmlGames = null ;
+        Document xmlGames ;
             try {
                 xmlGames = getNewDocumentBuilder().getDOMImplementation().createDocument(null, "steamgames", null);
             } catch (ParserConfigurationException ex) {
                 throw (new CustomException(TAG, ex));
             }
             xmlGames.setXmlVersion("1.0");
+
             Element root = xmlGames.getDocumentElement();
-            
-            Iterator<Game> it = gameList.iterator();
-            
-            while (it.hasNext()){
+
+            for (Game aGameList : gameList) {
                 Element elGame = xmlGames.createElement("game");
-                    createElementFromGame(it.next(), elGame);
-                    root.appendChild(elGame);
+                createElementFromGame(aGameList, elGame);
+                root.appendChild(elGame);
             }
             
             Source source = new DOMSource(xmlGames);
@@ -157,7 +152,7 @@ public class Xml {
         Game game ;
             game = new Game();
             game.setTitle(nodeMap.getNamedItem("title").getNodeValue());
-            //game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
+            game.setGenre(nodeMap.getNamedItem("genre").getNodeValue());
             game.setCompleted(Boolean.parseBoolean(nodeMap.getNamedItem("completed").getNodeValue()));
             game.setFavourite(Boolean.parseBoolean(nodeMap.getNamedItem("favourite").getNodeValue()));
             
